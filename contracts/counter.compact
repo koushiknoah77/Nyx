@@ -1,0 +1,47 @@
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+// ─── Privacy Model ───────────────────────────────────────────────────────────
+// PUBLIC (on-chain, visible to anyone):
+//   - `count`: the running counter total.
+//   - `owner`: a hash commitment identifying the current owner (not the secret).
+// PRIVATE (never leaves the user's machine):
+//   - `userSecret()`: witness returning the owner's 32-byte secret.
+//   - `secretStep()`: witness returning the private increment (1..10).
+// PROVED without revealing:
+//   - That the caller knows the secret behind `owner`.
+//   - That the private increment is within the allowed range 1..10.
+// DISCLOSED deliberately (via disclose()):
+//   - Only the owner commitment at init and the new counter total on each
+//     increment. Individual increments and secrets are never disclosed.
+
+export ledger count: Uint<64>;
+export ledger owner: Bytes<32>;
+
+witness userSecret(): Bytes<32>;
+witness secretStep(): Uint<64>;
+
+// Domain-separated hash turning a secret into a public commitment.
+// Knowing the preimage is proven in-circuit; the secret itself never leaves
+// the prover.
+circuit ownerOf(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "campus-counter:owner:v1"), sk]);
+}
+
+// One-time setup: bind the counter to the caller's secret commitment.
+export circuit init(): [] {
+  assert(count == 0, "already initialized");
+  const sk = userSecret();
+  owner = disclose(ownerOf(sk));
+}
+
+// Private increment: only the owner can call, the step stays hidden,
+// and only the new total becomes public.
+export circuit increment(): [] {
+  const sk = userSecret();
+  assert(owner == ownerOf(sk), "not owner");
+  const step = secretStep();
+  assert(step >= 1 && step <= 10, "step out of range 1..10");
+  count = (count + disclose(step)) as Uint<64>;
+}
