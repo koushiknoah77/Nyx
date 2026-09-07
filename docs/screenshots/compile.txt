@@ -1,5 +1,5 @@
 
-> campus-counter-l1@1.0.0 compile
+> nyx-counter@1.0.0 compile
 > compact compile contracts/counter.compact managed/counter && node scripts/syncify-managed.mjs managed
 
 Compiling 2 circuits:
