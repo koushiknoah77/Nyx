@@ -45,7 +45,41 @@ npm test   # vitest run — 5 tests: circuit logic, state transitions, privacy
 ```
 
 ## Initial Idea
-[LEAVE PLACEHOLDER — I will fill this in manually]
+Campus clubs and canteens need to check eligibility (enrolled student, age 18+,
+meal-credit threshold) without collecting ID cards, birth dates, or grades.
+The end goal is a campus pass where a student proves "I qualify" in zero
+knowledge and only a pass/fail plus a nullifier goes on-chain.
+
+This Level 1 counter is the minimal version of that pattern: `count` and an
+owner commitment are public, while the secret and each increment (1–10) stay
+private as witnesses. `init` binds the counter to `ownerOf(secret)` and
+`increment` proves ownership plus range, disclosing only the new total. Level 2
+will put a frontend on top; later levels extend the same shape to real
+eligibility attributes.
 
 ## Screenshots
-[LEAVE PLACEHOLDER — I will add compile output and contract address screenshots]
+Terminal captures live under `docs/screenshots/`.
+To add PNGs: take screenshots of your own terminal and save them as
+`docs/screenshots/compile.png`, `tests.png`, `deploy.png`.
+
+### Compile (`docs/screenshots/compile.txt`)
+```text
+> campus-counter-l1@1.0.0 compile
+> compact compile contracts/counter.compact managed/counter && node scripts/syncify-managed.mjs managed
+
+Compiling 2 circuits:
+syncify-managed: nothing to change
+```
+
+### Tests — 5 passing (`docs/screenshots/tests.txt`)
+```text
+ ✓ tests/counter.test.ts (5 tests)
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+```
+
+### Deploy — Preview contract address (`docs/screenshots/deploy.txt`)
+```text
+Contract Address: 6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1
+```

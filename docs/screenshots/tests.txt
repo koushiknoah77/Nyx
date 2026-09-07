@@ -1,0 +1,11 @@
+
+ RUN  v3.2.7 /mnt/c/Users/koush/OneDrive/Desktop/risein/my-project
+
+Sourcemap for "/mnt/c/Users/koush/OneDrive/Desktop/risein/my-project/managed/counter/contract/index.js" points to missing source files
+ ✓ tests/counter.test.ts (5 tests) 108ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  13:52:09
+   Duration  4.01s (transform 288ms, setup 0ms, collect 862ms, tests 108ms, environment 0ms, prepare 1.87s)
+
