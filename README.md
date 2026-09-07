@@ -1,5 +1,5 @@
-# Campus Counter
-> A privacy-first counter on Midnight: only the owner can increment, the step stays secret, and only the total is ever public.
+# Nyx
+> Campus Counter — a privacy-first counter on Midnight: only the owner can increment, the step stays secret, and only the total is ever public.
 
 ## Contract Address
 | Network | Address |

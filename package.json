@@ -1,8 +1,8 @@
 {
-  "name": "campus-counter-l1",
+  "name": "nyx-counter",
   "version": "1.0.0",
   "type": "module",
-  "description": "Midnight Builder Challenge L1 — privacy-first counter contract",
+  "description": "Nyx (campus counter) — privacy-first counter on Midnight",
   "license": "MIT",
   "scripts": {
     "compile": "compact compile contracts/counter.compact managed/counter && node scripts/syncify-managed.mjs managed",
