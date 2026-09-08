@@ -6,14 +6,15 @@
 
 *Seniors prove their offers count. Nobody sees their salary. The numbers can't be inflated.*
 
-[![Midnight](https://img.shields.io/badge/Midnight-Preview-0f172a?style=for-the-badge&logo=data:image/svg+xml;base64,000000)](https://docs.midnight.network)
+[![Midnight](https://img.shields.io/badge/Midnight-Preprod-0f172a?style=for-the-badge&logo=data:image/svg+xml;base64,000000)](https://docs.midnight.network)
 [![Compact](https://img.shields.io/badge/Compact-0.31.1-7c3aed?style=for-the-badge)](https://docs.midnight.network/compact)
 [![Node](https://img.shields.io/badge/Node-22-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Tests](https://img.shields.io/badge/Tests-5_passing-16a34a?style=for-the-badge)](tests/counter.test.ts)
-[![Deployed](https://img.shields.io/badge/Deployed-Preview-2563eb?style=for-the-badge)](#-contract-address)
+[![Frontend](https://img.shields.io/badge/Frontend-React_Vite-61dafb?style=for-the-badge)](src/App.tsx)
+[![Deployed](https://img.shields.io/badge/Deployed-Preprod-2563eb?style=for-the-badge)](#-contract-address)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-*Midnight Builder Challenge - Level 1 · Setup & First Contract*
+*Midnight Builder Challenge - Level 2 · Frontend Integration*
 
 </div>
 
@@ -42,6 +43,8 @@ on the Preprod network to click through it.
 This is a counter with a secret. Anyone can read the total. Only the owner can move it. And nobody - not me, not you, not someone staring at the chain explorer - can see the individual steps.
 
 I built it as the foundation for OfferStats (see Initial Idea): honest campus placement numbers where seniors prove offers without showing salaries. The counter is the smallest possible version of that machine - public totals, private inputs, proofs in between.
+
+Since Level 2 it has a face. The dApp in `src/` connects your Lace wallet on Preprod, reads the public total straight from the chain, and lets you initialize the counter or increment it with one click. The proof generates locally in your wallet - the secret never leaves your browser, the step is fixed at 1 and never shown anywhere, and every call carries the label it earns: "Proved without revealing your input."
 
 | Circuit | What happens |
 |---------|--------------|
@@ -98,12 +101,12 @@ never typed, never displayed. Every call carries the label it earns:
 
 | Layer | Choice |
 |-------|--------|
-| Network | Midnight Preview |
+| Network | Midnight Preprod (dApp + contract) · Preview (L1 history) |
 | Contract language | Compact 0.31.1 (language 0.23.0, `pragma language_version >= 0.23`) |
 | Runtime | `@midnight-ntwrk/compact-runtime` 0.16.0 |
 | Framework | `@midnight-ntwrk/midnight-js-*` 4.1.1 · `@midnight-ntwrk/wallet-sdk` 1.2.0 |
 | Proving | `midnightntwrk/proof-server:8.1.0` on port 6300 |
-| Frontend | React 19 + Vite 7 · Lace wallet via DApp Connector API 4.0.1 |
+| Frontend | React 19 + Vite 7 · Lace wallet via DApp Connector API 4.0.1 · proving delegated to wallet |
 | App | Node.js v22 (WSL Ubuntu) · TypeScript · Vitest |
 
 Versions follow the official support matrix: https://docs.midnight.network/relnotes/support-matrix - I learned the hard way that anything else breaks the deploy. Ask me about compiler 0.34 sometime. Actually don't.
@@ -159,8 +162,15 @@ Five tests, all green: init binds the owner, increments accumulate (3+10+1=14), 
 ## 📦 Deploy
 
 ```bash
-# Preview (needs tNIGHT + DUST; first run prints a faucet address and waits)
-MIDNIGHT_WALLET_SEED=<funded-preview-seed> npx tsx scripts/deploy-counter.ts --network preview
+# Contracts (Preview for L1, Preprod for L2 - first run prints a faucet address and waits)
+MIDNIGHT_WALLET_SEED=<funded-seed> npx tsx scripts/deploy-counter.ts --network preview
+MIDNIGHT_WALLET_SEED=<funded-seed> npx tsx scripts/deploy-counter.ts --network preprod
+```
+
+```bash
+# Frontend
+npm run dev       # Vite at http://localhost:5173
+npm run build     # typecheck + production bundle into dist/
 ```
 
 Records the address in `.midnight-state.json` (gitignored). Wallet sync state lives in `.midnight-wallet-state/` (gitignored). Pro tip I wish someone gave me: back up `.midnight-wallet-state` - without it every deploy re-syncs from genesis and you'll watch paint dry for 10 minutes.
@@ -173,8 +183,14 @@ Records the address in `.midnight-state.json` (gitignored). Wallet sync state li
 contracts/counter.compact   # the Compact contract
 managed/counter/            # compiler output: contract/ keys/ zkir/ compiler/
 scripts/                    # deploy-counter.ts, network.ts, wallet.ts, wallet-state.ts
+src/                        # React dApp: App, components/, hooks/, midnight/
+index.html                  # Vite entry
+vite.config.ts              # WASM + node-polyfill browser config
+vercel.json                 # SPA rewrites for hosting
+public/zk/counter/          # ZK artifacts served to the browser (keys/, zkir/)
 tests/counter.test.ts       # 5 vitest tests
 docs/l4-idea.md             # L4 idea submission overview (track + mapping)
+docs/l2-demo.md             # demo video script (four required shots)
 docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.txt)
 ```
 
@@ -184,6 +200,7 @@ docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.
 npx tsc --noEmit        # typecheck, must be clean
 npm run compile         # must print "Compiling 2 circuits"
 npm test                # must print "Tests 5 passed (5)"
+npm run build           # typecheck + Vite bundle into dist/
 ```
 
 ## 🗺️ Roadmap
@@ -192,7 +209,7 @@ Where I'm taking this, level by level:
 
 | Level | Plan |
 |-------|------|
-| L2 | Frontend: senior prove-screen + public stats dashboard, Lace on Preprod |
+| L2 (done) | Counter frontend on Preprod: Lace connect, browser circuit calls, local proving |
 | L3 | Production-grade: tests, CI/CD, idea approved against the problem list |
 | L4 | MVP live on Preprod. Track: Consumer & Social. Builds on Age / Eligibility Gate + Confidential Credentials (full writeup: `docs/l4-idea.md`) |
 | L5 | 50 Preprod users from one placed batch + a living feedback loop |
@@ -208,6 +225,10 @@ Where I'm taking this, level by level:
 - `does not contain a function-valued field named userSecret` → I hit this because my contract HAS witnesses and I deployed with `withVacantWitnesses`. Use `CompiledContract.withWitnesses(...)` with dummy witnesses for deploy.
 - `expected instance of ContractMaintenanceAuthority` → your compiler and runtime are from different eras. The pair that works: compiler 0.31.1 + runtime 0.16.0. Not 0.34.0 + 0.19.0. The support matrix is law.
 - Preview sync takes 5+ minutes on first run → normal. Copy a same-seed `.midnight-wallet-state/preview/` over to resume instantly, or make tea.
+- Frontend says no wallet found → install Lace, enable it, refresh. It reads wallets from `window.midnight`, and a fresh install only injects after a reload.
+- Wallet is on the wrong network → the app tells you which one Lace is on. Switch Lace to Preprod and reconnect.
+- Proving hangs in the browser → Lace must point at a reachable prover. For the demo I run the local proof server on 6300 and select Local in Lace Settings, Midnight section.
+- Vite warns about 500 kB+ chunks → expected. The ledger WASM bundles are megabytes by nature; the warning is noise.
 
 </details>
 
@@ -234,7 +255,7 @@ And this Level 1 counter? It's the seed of all that. Owner-bound increments beco
 ---
 
 ## 🎥 Demo Video
-[PLACEHOLDER — I will add the link after recording]
+[PLACEHOLDER - I will add the link after recording]
 
 Planned shots (under 2 minutes): connect Lace and show the address, call the
 circuit and show local proof generation, show the on-chain result, point out the
@@ -285,6 +306,8 @@ built in ~30s
 | Support matrix | https://docs.midnight.network/relnotes/support-matrix |
 | Windows setup | https://docs.midnight.network/guides/windows-compact-setup |
 | Preview faucet | https://midnight-tmnight-preview.nethermind.dev |
+| Preprod faucet | https://midnight-tmnight-preprod.nethermind.dev |
+| Lace wallet | https://chromewebstore.google.com/detail/lace/gafhhkghbfjjkeiendhlofajokpaflmk |
 
 ## 📄 License
 
