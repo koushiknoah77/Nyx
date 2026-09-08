@@ -229,6 +229,7 @@ Last verified: tsc clean · 2 circuits · 6/6 tests · 1430 modules in ~27s. The
 |-------|--------|------|
 | L1 | ✅ done | Counter on Preview: compile, tests, deploy |
 | L2 | ✅ done | Frontend on Preprod: Lace connect, browser circuit calls, local proving |
+| OfferStats v1 | ✅ contract done | `contracts/offerstats.compact`: 4 CTC brackets, 32-slot nullifier set, threshold predicates — 8/8 tests green, not yet deployed ([proposal](PROPOSAL.md), [idea](docs/l4-idea.md)) |
 | L3 | 🔄 next | Production-grade: CI passing, idea approved against the problem list |
 | L4 | 📝 planned | MVP live on Preprod · Track: Consumer & Social ([writeup](docs/l4-idea.md)) |
 | L5 | 📝 planned | 50 Preprod users from one placed batch + feedback loop |

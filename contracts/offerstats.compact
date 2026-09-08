@@ -1,0 +1,287 @@
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+// ─── OfferStats v1 — tamper-proof campus placement statistics ────────────────
+//
+// A placed senior proves their offer counts toward honest aggregates without
+// revealing their salary. One offer = one count: an offer nullifier means no
+// double-counting and no invented entries.
+//
+// Brackets (CTC in INR per annum) — the bracket is PUBLIC (it is the product),
+// the exact salary stays a private witness validated by a range predicate:
+//   0: < 500,000 | 1: 500,000–999,999 | 2: 1,000,000–1,999,999 | 3: >= 2,000,000
+//
+// ─── Privacy Model ───────────────────────────────────────────────────────────
+// PUBLIC (on-chain, visible to anyone):
+//   - `b0..b3`: per-bracket offer counts. The product.
+//   - `total`: offers counted so far. `batchSize`: students in the batch
+//     (% placed = total / batchSize, derived off-chain).
+//   - `initialized`: one-time-setup flag (same guard pattern as the counter).
+//   - Nullifier slots `n00..n31`: spent offer commitments. They prove an
+//     offer was counted without saying whose.
+// PRIVATE (never leaves the user's machine, never rendered in the UI):
+//   - `offerSecret()`: the senior's 32-byte per-offer secret.
+//   - `ctc()`: the exact CTC. Only its bracket membership is proven.
+// PROVED without revealing:
+//   - "My salary falls in the bracket I am incrementing" (range predicate).
+//   - "This offer has not been counted before" (nullifier freshness).
+// DISCLOSED deliberately (via disclose()):
+//   - `batchSize` at init; the `bracket` index at record time (public by
+//     design — it selects which public total moves, so control flow needs it);
+//     the nullifier at record time (dup detection needs it on-ledger).
+//   - The secret and the exact CTC are NEVER disclosed.
+//
+// ─── Capacity & honesty notes ────────────────────────────────────────────────
+// v1 holds 32 offers (one pilot batch). Compact 0.23 has no ledger vectors
+// with element-wise writes, so nullifier slots are explicit fields with an
+// unrolled freshness check — 32 slots, 32 asserts, 32-way store. A v2 with a
+// Merkle nullifier set (or one contract per batch shard) lifts the cap.
+// Sybil note: v1 binds one secret per senior out-of-band (placement cell
+// hands each senior exactly one secret). Mainnet adds issuer-signed offer
+// commitments so self-dealt secrets stop working. Median CTC is derived
+// off-chain from the public bracket counts (no hidden inputs involved).
+
+export ledger batchSize: Uint<64>;
+export ledger initialized: Boolean;
+export ledger total: Uint<64>;
+export ledger b0: Uint<64>;
+export ledger b1: Uint<64>;
+export ledger b2: Uint<64>;
+export ledger b3: Uint<64>;
+export ledger n00: Bytes<32>;
+export ledger n01: Bytes<32>;
+export ledger n02: Bytes<32>;
+export ledger n03: Bytes<32>;
+export ledger n04: Bytes<32>;
+export ledger n05: Bytes<32>;
+export ledger n06: Bytes<32>;
+export ledger n07: Bytes<32>;
+export ledger n08: Bytes<32>;
+export ledger n09: Bytes<32>;
+export ledger n10: Bytes<32>;
+export ledger n11: Bytes<32>;
+export ledger n12: Bytes<32>;
+export ledger n13: Bytes<32>;
+export ledger n14: Bytes<32>;
+export ledger n15: Bytes<32>;
+export ledger n16: Bytes<32>;
+export ledger n17: Bytes<32>;
+export ledger n18: Bytes<32>;
+export ledger n19: Bytes<32>;
+export ledger n20: Bytes<32>;
+export ledger n21: Bytes<32>;
+export ledger n22: Bytes<32>;
+export ledger n23: Bytes<32>;
+export ledger n24: Bytes<32>;
+export ledger n25: Bytes<32>;
+export ledger n26: Bytes<32>;
+export ledger n27: Bytes<32>;
+export ledger n28: Bytes<32>;
+export ledger n29: Bytes<32>;
+export ledger n30: Bytes<32>;
+export ledger n31: Bytes<32>;
+
+witness offerSecret(): Bytes<32>;
+witness ctc(): Uint<64>;
+
+// Domain-separated nullifier: one offer secret maps to exactly one public
+// commitment, so replaying the same secret trips the freshness check.
+circuit nullifierOf(secret: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "offerstats:nullifier:v1"), secret]);
+}
+
+// One-time setup: publish the batch size. No secrets involved.
+export circuit init(size: Uint<64>): [] {
+  assert(!initialized, "already initialized");
+  batchSize = disclose(size);
+  initialized = true;
+}
+
+// Count one offer in a public bracket. Atomic: freshness check, private range
+// predicate, bracket increment, nullifier store — all in this circuit.
+export circuit record(bracket: Uint<8>): [] {
+  assert(initialized, "not initialized");
+  assert(total < 32, "batch full");
+  const b = disclose(bracket);
+  assert(b < 4, "bad bracket");
+  const nf = disclose(nullifierOf(offerSecret()));
+  assert(nf != n00, "already counted");
+  assert(nf != n01, "already counted");
+  assert(nf != n02, "already counted");
+  assert(nf != n03, "already counted");
+  assert(nf != n04, "already counted");
+  assert(nf != n05, "already counted");
+  assert(nf != n06, "already counted");
+  assert(nf != n07, "already counted");
+  assert(nf != n08, "already counted");
+  assert(nf != n09, "already counted");
+  assert(nf != n10, "already counted");
+  assert(nf != n11, "already counted");
+  assert(nf != n12, "already counted");
+  assert(nf != n13, "already counted");
+  assert(nf != n14, "already counted");
+  assert(nf != n15, "already counted");
+  assert(nf != n16, "already counted");
+  assert(nf != n17, "already counted");
+  assert(nf != n18, "already counted");
+  assert(nf != n19, "already counted");
+  assert(nf != n20, "already counted");
+  assert(nf != n21, "already counted");
+  assert(nf != n22, "already counted");
+  assert(nf != n23, "already counted");
+  assert(nf != n24, "already counted");
+  assert(nf != n25, "already counted");
+  assert(nf != n26, "already counted");
+  assert(nf != n27, "already counted");
+  assert(nf != n28, "already counted");
+  assert(nf != n29, "already counted");
+  assert(nf != n30, "already counted");
+  assert(nf != n31, "already counted");
+  const salary = ctc();
+  if (b == 0) {
+    assert(salary < 500000, "ctc not in bracket 0");
+    b0 = (b0 + 1) as Uint<64>;
+  } else {
+    if (b == 1) {
+      assert(salary >= 500000, "ctc not in bracket 1");
+      assert(salary < 1000000, "ctc not in bracket 1");
+      b1 = (b1 + 1) as Uint<64>;
+    } else {
+      if (b == 2) {
+        assert(salary >= 1000000, "ctc not in bracket 2");
+        assert(salary < 2000000, "ctc not in bracket 2");
+        b2 = (b2 + 1) as Uint<64>;
+      } else {
+        assert(salary >= 2000000, "ctc not in bracket 3");
+        b3 = (b3 + 1) as Uint<64>;
+      }
+    }
+  }
+  if (total == 0) {
+    n00 = nf;
+  } else {
+    if (total == 1) {
+      n01 = nf;
+    } else {
+      if (total == 2) {
+        n02 = nf;
+      } else {
+        if (total == 3) {
+          n03 = nf;
+        } else {
+          if (total == 4) {
+            n04 = nf;
+          } else {
+            if (total == 5) {
+              n05 = nf;
+            } else {
+              if (total == 6) {
+                n06 = nf;
+              } else {
+                if (total == 7) {
+                  n07 = nf;
+                } else {
+                  if (total == 8) {
+                    n08 = nf;
+                  } else {
+                    if (total == 9) {
+                      n09 = nf;
+                    } else {
+                      if (total == 10) {
+                        n10 = nf;
+                      } else {
+                        if (total == 11) {
+                          n11 = nf;
+                        } else {
+                          if (total == 12) {
+                            n12 = nf;
+                          } else {
+                            if (total == 13) {
+                              n13 = nf;
+                            } else {
+                              if (total == 14) {
+                                n14 = nf;
+                              } else {
+                                if (total == 15) {
+                                  n15 = nf;
+                                } else {
+                                  if (total == 16) {
+                                    n16 = nf;
+                                  } else {
+                                    if (total == 17) {
+                                      n17 = nf;
+                                    } else {
+                                      if (total == 18) {
+                                        n18 = nf;
+                                      } else {
+                                        if (total == 19) {
+                                          n19 = nf;
+                                        } else {
+                                          if (total == 20) {
+                                            n20 = nf;
+                                          } else {
+                                            if (total == 21) {
+                                              n21 = nf;
+                                            } else {
+                                              if (total == 22) {
+                                                n22 = nf;
+                                              } else {
+                                                if (total == 23) {
+                                                  n23 = nf;
+                                                } else {
+                                                  if (total == 24) {
+                                                    n24 = nf;
+                                                  } else {
+                                                    if (total == 25) {
+                                                      n25 = nf;
+                                                    } else {
+                                                      if (total == 26) {
+                                                        n26 = nf;
+                                                      } else {
+                                                        if (total == 27) {
+                                                          n27 = nf;
+                                                        } else {
+                                                          if (total == 28) {
+                                                            n28 = nf;
+                                                          } else {
+                                                            if (total == 29) {
+                                                              n29 = nf;
+                                                            } else {
+                                                              if (total == 30) {
+                                                                n30 = nf;
+                                                              } else {
+                                                                n31 = nf;
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  total = (total + 1) as Uint<64>;
+}

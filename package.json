@@ -9,7 +9,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "compile": "compact compile contracts/counter.compact managed/counter && node scripts/syncify-managed.mjs managed",
+    "compile": "compact compile contracts/counter.compact managed/counter && compact compile contracts/offerstats.compact managed/offerstats && node scripts/syncify-managed.mjs managed",
     "test": "vitest run",
     "deploy": "tsx scripts/deploy-counter.ts"
   },

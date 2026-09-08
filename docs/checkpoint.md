@@ -50,6 +50,12 @@ L4 submission in `docs/l4-idea.md`, L2 demo script in `docs/l2-demo.md`.
   Preprod syncs clean). Likely Preview-side data tripping an SDK replay path.
   Workaround when needed: fresh Preview wallet + faucet funds (virgin shielded
   state has no history to replay).
+- OfferStats v1 contract (`contracts/offerstats.compact` → `managed/offerstats/`,
+  `tests/offerstats.test.ts` 8/8): brackets b0–b3, 32 nullifier slots, init guard,
+  capacity guard. Compact 0.23 findings: no C-style loops (`for const of lo..hi`),
+  no element-wise ledger-Vector writes, circuit params are private by default
+  (branching needs `disclose()`). `npm run compile` builds both contracts.
+  Not yet deployed; frontend still targets the counter.
 
 ## Still manual (needs human)
 1. `npm i -g vercel; vercel login; vercel --prod` → paste URL into README Live Demo.
