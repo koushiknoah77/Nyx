@@ -80,6 +80,20 @@ flowchart LR
 
 ---
 
+## 🔒 Privacy Claim
+
+An on-chain observer watching my Preprod contract sees exactly two things: the
+running total going up, and an owner commitment sitting in storage. That is the
+complete list.
+
+What they can never see: the owner's secret, the step size of any increment, or
+which increments belong to whom. The UI upholds the same rule - there is no input
+field for secrets anywhere in the app. The step is fixed at 1, created locally,
+never typed, never displayed. Every call carries the label it earns:
+"Proved without revealing your input."
+
+---
+
 ## 🛠️ Tech Stack
 
 | Layer | Choice |
@@ -89,6 +103,7 @@ flowchart LR
 | Runtime | `@midnight-ntwrk/compact-runtime` 0.16.0 |
 | Framework | `@midnight-ntwrk/midnight-js-*` 4.1.1 · `@midnight-ntwrk/wallet-sdk` 1.2.0 |
 | Proving | `midnightntwrk/proof-server:8.1.0` on port 6300 |
+| Frontend | React 19 + Vite 7 · Lace wallet via DApp Connector API 4.0.1 |
 | App | Node.js v22 (WSL Ubuntu) · TypeScript · Vitest |
 
 Versions follow the official support matrix: https://docs.midnight.network/relnotes/support-matrix - I learned the hard way that anything else breaks the deploy. Ask me about compiler 0.34 sometime. Actually don't.
@@ -106,6 +121,7 @@ docker run -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -
 ```
 - **Compact toolchain**: `compact update 0.31.1`, check with `compact compile --version`
 - **A funded Preview wallet** for deploy (faucet: https://midnight-tmnight-preview.nethermind.dev). My deploy script reuses `MIDNIGHT_WALLET_SEED` if you set it, otherwise it makes you a wallet and waits while you fund it.
+- **Lace wallet** (Chrome extension) for the frontend demo, switched to the Preprod network.
 
 ---
 
@@ -216,6 +232,13 @@ Later, the same nullifier-bracket pattern stretches to internships, hackathon wi
 And this Level 1 counter? It's the seed of all that. Owner-bound increments become one-nullifier-one-count offer brackets. The 1-10 range proof becomes a CTC-threshold predicate. `count` becomes per-bracket public totals. Small now, honest later.
 
 ---
+
+## 🎥 Demo Video
+[PLACEHOLDER — I will add the link after recording]
+
+Planned shots (under 2 minutes): connect Lace and show the address, call the
+circuit and show local proof generation, show the on-chain result, point out the
+private input was never shown. Full script: `docs/l2-demo.md`.
 
 ## 📸 Screenshots
 
