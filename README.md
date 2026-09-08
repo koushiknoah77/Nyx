@@ -136,6 +136,7 @@ contracts/counter.compact   # the Compact contract
 managed/counter/            # compiler output: contract/ keys/ zkir/ compiler/
 scripts/                    # deploy-counter.ts, network.ts, wallet.ts, wallet-state.ts
 tests/counter.test.ts       # 5 vitest tests
+docs/l4-idea.md             # L4 idea submission overview (track + mapping)
 docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.txt)
 ```
 
@@ -146,6 +147,18 @@ npx tsc --noEmit        # typecheck, must be clean
 npm run compile         # must print "Compiling 2 circuits"
 npm test                # must print "Tests 5 passed (5)"
 ```
+
+## 🗺️ Roadmap
+
+Where I'm taking this, level by level:
+
+| Level | Plan |
+|-------|------|
+| L2 | Frontend: senior prove-screen + public stats dashboard, Lace on Preprod |
+| L3 | Production-grade: tests, CI/CD, idea approved against the problem list |
+| L4 | MVP live on Preprod. Track: Consumer & Social. Builds on Age / Eligibility Gate + Confidential Credentials (full writeup: `docs/l4-idea.md`) |
+| L5 | 50 Preprod users from one placed batch + a living feedback loop |
+| L6 | Mainnet deploy, brand assets, 20 real users |
 
 ---
 
