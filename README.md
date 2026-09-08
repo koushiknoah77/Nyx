@@ -5,11 +5,12 @@ Midnight Builder Challenge - Level 1 (Setup & First Contract).
 
 ## Contract Address
 | Network | Address |
-|---------|------------------------------------------------------------------|
+|----------|----------------------------------|
 | Preview | 6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1 |
-| Preprod | Not deployed yet |
+| Preprod | [PASTE ADDRESS AFTER DEPLOY] |
+(This section is MANDATORY. Leave placeholders if not deployed yet.)
 
-Deployed 2026-09-07 from wallet `mn_addr_preview1g9d...aphuue` (full address in local `.midnight-state.json`, gitignored).
+Deployed to Preview on 2026-09-07 from wallet `mn_addr_preview1g9d...aphuue` (full address in local `.midnight-state.json`, gitignored).
 
 ## What This Does
 `contracts/counter.compact` keeps a running total anyone can read, while the increments stay private. The owner initializes the counter by binding it to a secret commitment, then increments it with hidden steps (1-10). Each call proves two things in zero knowledge: the caller is the owner, and the hidden step is in range.
