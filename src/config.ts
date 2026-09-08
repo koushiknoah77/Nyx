@@ -16,6 +16,10 @@ export const PRIVATE_STATE_ID = 'counterPrivateState';
 // Served by Vite/Vercel from public/zk/counter -> {keys,zkir} copied from managed/.
 export const ZK_BASE_PATH = '/zk/counter';
 
+// Community explorer (TexLabs) for Preprod. Deep item URLs are not stable,
+// so the UI links to the explorer home with a paste-your-hash hint.
+export const EXPLORER_URL = 'https://preprod.midnightexplorer.com/';
+
 // localStorage key for the owner's secret. Generated once per browser,
 // never displayed anywhere in the UI.
 export const SECRET_STORAGE_KEY = 'nyx-owner-secret';
