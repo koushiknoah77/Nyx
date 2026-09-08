@@ -9,7 +9,7 @@ L4 submission in `docs/l4-idea.md`, L2 demo script in `docs/l2-demo.md`.
 
 ## Deployments (public info)
 - Preview (L1): `6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1`
-- Preprod (L2): `fd737b5c0f40cdc6fd052a2fbf74fff3e8c24b0ffdf20f19ab6f9b6dcea6b2cc`
+- Preprod (L2): `3cec0caf86e0daf71868051c301f9c7841586963c3063ba3b232835ef304ff4f` (redeployed for constant-1 increment)
 - Records live in local `.midnight-state.json` (gitignored, never commit).
 - Wallet seeds live ONLY in `../mn-demo/.midnight-state.json` + env vars (never in repo).
 
@@ -33,7 +33,7 @@ L4 submission in `docs/l4-idea.md`, L2 demo script in `docs/l2-demo.md`.
   preprod `midnight-tmnight-preprod.nethermind.dev`.
 
 ## Done
-- L1: compile, 5/5 tests, Preview deploy, README, 5+ commits, submitted shape.
+- L1: compile, 4/4 tests (constant-1 design), Preview deploy, README, 5+ commits, submitted shape.
 - L2 code: Preprod deploy, full frontend (connect/disconnect + errors,
   init/increment calls, local proving, hidden witnesses, exact UI label),
   `tsc` + `vite build` green, L1 tests still 5/5, 9 L2 commits, README sections.

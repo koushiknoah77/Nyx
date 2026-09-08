@@ -9,8 +9,9 @@
 [![Midnight](https://img.shields.io/badge/Midnight-Preprod-0f172a?style=for-the-badge&logo=data:image/svg+xml;base64,000000)](https://docs.midnight.network)
 [![Compact](https://img.shields.io/badge/Compact-0.31.1-7c3aed?style=for-the-badge)](https://docs.midnight.network/compact)
 [![Node](https://img.shields.io/badge/Node-22-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
-[![Tests](https://img.shields.io/badge/Tests-5_passing-16a34a?style=for-the-badge)](tests/counter.test.ts)
+[![Tests](https://img.shields.io/badge/Tests-4_passing-16a34a?style=for-the-badge)](tests/counter.test.ts)
 [![Frontend](https://img.shields.io/badge/Frontend-React_Vite-61dafb?style=for-the-badge)](src/App.tsx)
+[![CI](https://img.shields.io/github/actions/workflow/status/koushiknoah77/Nyx/ci.yml?branch=main&style=for-the-badge&logo=github)](https://github.com/koushiknoah77/Nyx/actions)
 [![Deployed](https://img.shields.io/badge/Deployed-Preprod-2563eb?style=for-the-badge)](#-contract-address)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
@@ -29,10 +30,11 @@ on the Preprod network to click through it.
 ## 📍 Contract Address
 | Network | Address |
 |---------|------------------------------------------------------------------|
-| Preprod | fd737b5c0f40cdc6fd052a2fbf74fff3e8c24b0ffdf20f19ab6f9b6dcea6b2cc |
+| Preprod | 3cec0caf86e0daf71868051c301f9c7841586963c3063ba3b232835ef304ff4f |
 | Preview | 6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1 |
 
-> Preprod deployed on 2026-09-08 for the Level 2 frontend. Preview deployed on
+> Preprod redeployed on 2026-09-08 for the privacy-first increment (constant +1,
+> no step disclosure). Preview deployed on
 > 2026-09-07 for Level 1. Deployer wallets live in local `.midnight-state.json`
 > (gitignored).
 
@@ -40,16 +42,16 @@ on the Preprod network to click through it.
 
 ## ✨ What This Does
 
-This is a counter with a secret. Anyone can read the total. Only the owner can move it. And nobody - not me, not you, not someone staring at the chain explorer - can see the individual steps.
+This is a counter with a secret. Anyone can read the total and how much each increment moved it. Only the owner can move it. And nobody - not me, not you, not someone staring at the chain explorer - can see the secret behind it or who moved it.
 
 I built it as the foundation for OfferStats (see Initial Idea): honest campus placement numbers where seniors prove offers without showing salaries. The counter is the smallest possible version of that machine - public totals, private inputs, proofs in between.
 
-Since Level 2 it has a face. The dApp in `src/` connects your Lace wallet on Preprod, reads the public total straight from the chain, and lets you initialize the counter or increment it with one click. The proof generates locally in your wallet - the secret never leaves your browser, the step is fixed at 1 and never shown anywhere, and every call carries the label it earns: "Proved without revealing your input."
+Since Level 2 it has a face. The dApp in `src/` connects your Lace wallet on Preprod, reads the public total straight from the chain, and lets you initialize the counter or increment it with one click. The proof generates locally in your wallet - the secret never leaves your browser, the increment is the public constant 1 - there is no step input anywhere in the app, and every call carries the label it earns: "Proved without revealing your input."
 
 | Circuit | What happens |
 |---------|--------------|
 | `init()` | One-time setup - locks the counter to the owner's secret commitment |
-| `increment()` | Owner-only private step (1-10) - reveals **only the new total** |
+| `increment()` | Owner-only +1 - the constant increment moves the public total; the secret stays hidden |
 
 No constructor args. Deploy runs the implicit constructor, then `init` is the first circuit call.
 
@@ -61,39 +63,39 @@ Roadmap: L2/L3 grows this into offer-bracket counters with nullifier sets - one 
 
 - What is PUBLIC (on-chain, visible to anyone):
   - `count` - the running total. This is the whole point: the world gets to see the number.
+  - the increment - a public **constant 1**. There is no step input to hide; each call moves the total by exactly one.
   - `owner` - a hash commitment (`persistentHash("campus-counter:owner:v1" || secret)`). It says *someone* owns this counter without saying who.
-- What is PRIVATE (private witness, never on-chain):
+- What is PRIVATE (never on-chain, never in the UI):
   - `userSecret()` - the owner's 32-byte secret. Lives on their device. Dies with their device.
-  - `secretStep()` - the increment amount (1-10). Nobody's business but the owner's.
+  - The person behind the proof - ownership is a zero-knowledge check, not a wallet check, so the proof never names the caller.
 - What the user PROVES without revealing:
   - "I know the secret behind this counter" - without showing it.
-  - "My step is between 1 and 10" - without saying which.
 
-`disclose()` shows up exactly twice in my code, and both times on purpose: the owner commitment at `init`, the new total at `increment`. Everything else stays in the dark. That's the entire philosophy of this project in two lines of code.
+`disclose()` shows up exactly once in my code, on purpose: the owner commitment at `init`. The increment is the constant 1 - there is nothing else to disclose, and the secret itself is never disclosed. That's the entire philosophy of this project in one line of code.
 
 ```mermaid
 flowchart LR
     A["🔑 userSecret<br/>(private witness)"] --> C{"init()"}
-    B["🔢 secretStep 1-10<br/>(private witness)"] --> D{"increment()"}
     C -->|"disclose(owner)"| E[("⛓️ Ledger<br/>count + owner")]
-    D -->|"disclose(new total)"| E
+    D{"increment()"} -->|"count += 1 (public constant)"| E
     A -.->|"never on-chain"| F["🚫"]
-    B -.->|"never on-chain"| F
 ```
 
 ---
 
 ## 🔒 Privacy Claim
 
-An on-chain observer watching my Preprod contract sees exactly two things: the
-running total going up, and an owner commitment sitting in storage. That is the
+An on-chain observer watching my Preprod contract sees two things: the running
+total and an owner commitment sitting in storage. The increment amount is the
+public constant 1 - each call moves the total by exactly one. That is the
 complete list.
 
-What they can never see: the owner's secret, the step size of any increment, or
-which increments belong to whom. The UI upholds the same rule - there is no input
-field for secrets anywhere in the app. The step is fixed at 1, created locally,
-never typed, never displayed. Every call carries the label it earns:
-"Proved without revealing your input."
+What they can never see: the owner's 32-byte secret, or the person behind the
+proof - the commitment proves *someone* who knows the secret called, and never
+says who. The UI upholds the same rule - there is no input field for secrets
+anywhere in the app - there is no step field at all, because the increment is a
+public constant. Every call carries the label it earns: "Proved without
+revealing your input."
 
 ---
 
@@ -154,10 +156,10 @@ Midnight section) with Docker running:
 ## 🧪 Run Tests
 
 ```bash
-npm test   # vitest run - 5 tests: circuit logic, state transitions, privacy
+npm test   # vitest run - 4 tests: circuit logic, state transitions, privacy
 ```
 
-Five tests, all green: init binds the owner, increments accumulate (3+10+1=14), strangers get rejected, out-of-range steps get rejected, and raw secrets never appear in public state. If any of that breaks, nothing else I build on top matters.
+Four tests, all green: init binds the owner, increments accumulate by the constant 1, strangers get rejected, and raw secrets never appear in public state. If any of that breaks, nothing else I build on top matters.
 
 ## 📦 Deploy
 
@@ -199,7 +201,7 @@ docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.
 ```bash
 npx tsc --noEmit        # typecheck, must be clean
 npm run compile         # must print "Compiling 2 circuits"
-npm test                # must print "Tests 5 passed (5)"
+npm test                # must print "Tests 4 passed (4)"
 npm run build           # typecheck + Vite bundle into dist/
 ```
 
@@ -250,7 +252,7 @@ My first 50 users are one placed batch. Classmates with offers prove, juniors ve
 
 Later, the same nullifier-bracket pattern stretches to internships, hackathon wins, any countable credential.
 
-And this Level 1 counter? It's the seed of all that. Owner-bound increments become one-nullifier-one-count offer brackets. The 1-10 range proof becomes a CTC-threshold predicate. `count` becomes per-bracket public totals. Small now, honest later.
+And this Level 1 counter? It's the seed of all that. Owner-bound increments become one-nullifier-one-count offer brackets. The ownership proof becomes a CTC-threshold predicate. `count` becomes per-bracket public totals. Small now, honest later.
 
 ---
 
@@ -274,17 +276,17 @@ Compiling 2 circuits:
 syncify-managed: nothing to change
 ```
 
-### Tests - 5 passing (`docs/screenshots/tests.txt`)
+### Tests - 4 passing (`docs/screenshots/tests.txt`)
 ```text
- ✓ tests/counter.test.ts (5 tests)
+ ✓ tests/counter.test.ts (4 tests)
 
  Test Files  1 passed (1)
-      Tests  5 passed (5)
+      Tests  4 passed (4)
 ```
 
-### Deploy - Preview contract address (`docs/screenshots/deploy.txt`)
+### Deploy - Preprod contract address (`docs/screenshots/deploy.txt`)
 ```text
-Contract Address: 6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1
+Contract Address: 3cec0caf86e0daf71868051c301f9c7841586963c3063ba3b232835ef304ff4f
 ```
 
 ### Frontend build (`docs/screenshots/frontend-build.txt`)

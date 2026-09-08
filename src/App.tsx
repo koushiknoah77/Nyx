@@ -32,7 +32,7 @@ export default function App() {
 
       <footer>
         <p className="muted tiny">
-          Proofs generate locally in your wallet. Your secret and step never leave this browser.
+          Proofs generate locally in your wallet. Your secret never leaves this browser.
         </p>
       </footer>
     </div>

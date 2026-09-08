@@ -54,8 +54,11 @@ export function CircuitCall({ api, unshieldedAddress }: Props) {
         const result = await callCircuit(providers, circuit);
         setTxId(txIdOf(result));
         setPhase('done');
-        // Indexer lags submission: re-read after a beat, plus manual Refresh.
-        window.setTimeout(() => void refresh(), 10000);
+        // Indexer lags submission: re-read on a short retry schedule so the
+        // on-chain result appears promptly; manual Refresh always available.
+        for (const delay of [3000, 10000]) {
+          window.setTimeout(() => void refresh(), delay);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
         setPhase('error');
@@ -97,7 +100,7 @@ export function CircuitCall({ api, unshieldedAddress }: Props) {
         </button>
       ) : (
         <button onClick={() => void run('increment')} disabled={busy || !view}>
-          {busy ? 'Generating proof locally…' : 'Increment +1 (private step)'}
+          {busy ? 'Generating proof locally…' : 'Increment +1'}
         </button>
       )}
       <button className="ghost" onClick={() => void refresh()} disabled={busy || reading}>

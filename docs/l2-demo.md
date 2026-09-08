@@ -13,7 +13,7 @@ Target: prove the four Step 7 shots. Total budget ~110 seconds.
 ## Shots
 1. (0:00-0:25) Connect Lace wallet. Show the address appearing on screen.
    Say: "Connected through Lace on Preprod."
-2. (0:25-1:00) Click "Increment +1 (private step)". Show the
+2. (0:25-1:00) Click "Increment +1". Show the
    "Generating proof locally..." loading state. Say: "The proof is being
    generated locally in the wallet."
 3. (1:00-1:35) Show the submitted transaction id and the refreshed public

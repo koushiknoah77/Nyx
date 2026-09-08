@@ -37,15 +37,6 @@
         "type-name": "Bytes",
         "length": 32
       }
-    },
-    {
-      "name": "secretStep",
-      "arguments": [
-      ],
-      "result type": {
-        "type-name": "Uint",
-        "maxval": 18446744073709551615
-      }
     }
   ],
   "contracts": [

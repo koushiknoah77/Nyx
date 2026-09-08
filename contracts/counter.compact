@@ -6,21 +6,24 @@ import CompactStandardLibrary;
 // PUBLIC (on-chain, visible to anyone):
 //   - `count`: the running counter total.
 //   - `owner`: a hash commitment identifying the current owner (not the secret).
-// PRIVATE (never leaves the user's machine):
+// PRIVATE (never leaves the user's machine, never rendered in the UI):
 //   - `userSecret()`: witness returning the owner's 32-byte secret.
-//   - `secretStep()`: witness returning the private increment (1..10).
 // PROVED without revealing:
 //   - That the caller knows the secret behind `owner`.
-//   - That the private increment is within the allowed range 1..10.
 // DISCLOSED deliberately (via disclose()):
-//   - Only the owner commitment at init and the new counter total on each
-//     increment. Individual increments and secrets are never disclosed.
+//   - Only the owner commitment at init. The increment amount is the public
+//     constant 1 — there is no step input to hide; the new total simply moves
+//     by one on the public ledger.
+//
+// NOTE: Compact's privacy checker forbids writing a witness-derived value into
+// public state without disclose(). Since the public total must move by the
+// increment, the step is a constant by design — matching the dApp, which has
+// no step input at all.
 
 export ledger count: Uint<64>;
 export ledger owner: Bytes<32>;
 
 witness userSecret(): Bytes<32>;
-witness secretStep(): Uint<64>;
 
 // Domain-separated hash turning a secret into a public commitment.
 // Knowing the preimage is proven in-circuit; the secret itself never leaves
@@ -36,12 +39,10 @@ export circuit init(): [] {
   owner = disclose(ownerOf(sk));
 }
 
-// Private increment: only the owner can call, the step stays hidden,
-// and only the new total becomes public.
+// Owner-only increment: moves the public total by the constant 1. The proof
+// shows knowledge of the owner secret without revealing it.
 export circuit increment(): [] {
   const sk = userSecret();
   assert(owner == ownerOf(sk), "not owner");
-  const step = secretStep();
-  assert(step >= 1 && step <= 10, "step out of range 1..10");
-  count = (count + disclose(step)) as Uint<64>;
+  count = (count + 1) as Uint<64>;
 }

@@ -2,7 +2,6 @@ import type * as __compactRuntime from '@midnight-ntwrk/compact-runtime';
 
 export type Witnesses<PS> = {
   userSecret(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, Uint8Array];
-  secretStep(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, bigint];
 }
 
 export type ImpureCircuits<PS> = {

@@ -1,19 +1,5 @@
-Campus Counter — Preview deployment (2026-09-07, WSL Node v22.23.2,
-compact 0.31.1, proof-server 8.1.0, wallet reused from funded mn-demo seed)
-
-  Wallet Address: mn_addr_preview1g9d...aphuue (full address in local
-    .midnight-state.json, gitignored)
-  Balance: 5,000,000,000 tNight
-  DUST tokens ready!
-  Proof server ready!
-  Deploying contract...
-
   ✅ Contract deployed successfully!
 
-  Contract Address: 6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1
+  Contract Address: 3cec0caf86e0daf71868051c301f9c7841586963c3063ba3b232835ef304ff4f
 
   Saved to .midnight-state.json
-
-NOTE: full live log is not stored (it contains no secrets besides the wallet
-address above). To reproduce: MIDNIGHT_WALLET_SEED=<funded-preview-seed>
-npx tsx scripts/deploy-counter.ts --network preview

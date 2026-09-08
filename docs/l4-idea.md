@@ -36,5 +36,5 @@ the public ledger; everything identifying stays a private witness.
 ## Grows out of L1
 Deployed Preview counter (6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1)
 evolves directly: owner-bound increments become one-nullifier-one-count offer brackets,
-the 1–10 range proof becomes a CTC-threshold predicate, `count` becomes per-bracket
+the ownership proof becomes a CTC-threshold predicate, `count` becomes per-bracket
 public totals.

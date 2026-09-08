@@ -86,15 +86,13 @@ if (!fs.existsSync(contractPath)) {
 
 const Counter = await import(pathToFileURL(contractPath).href);
 
-// Counter has private witnesses (userSecret, secretStep) so withVacantWitnesses
+// Counter has a private witness (userSecret) so withVacantWitnesses
 // fails at Contract construction ("does not contain function-valued field").
 // Deploy only runs the constructor (no witness needed), so attach dummy
 // witnesses. Real values are supplied later via callTx/findDeployedContract.
 const dummyWitnesses = {
   userSecret: ({ privateState }: { privateState: unknown }) =>
     [privateState, new Uint8Array(32)] as [unknown, Uint8Array],
-  secretStep: ({ privateState }: { privateState: unknown }) =>
-    [privateState, 1n] as [unknown, bigint],
 };
 
 const compiledContract = CompiledContract.make(

@@ -1,17 +1,5 @@
-Nyx frontend production build (2026-09-08, WSL Node v22, Vite 7.3.6)
-
-> nyx-counter build = tsc --noEmit && vite build
-> vite v7.3.6 building client environment for production...
-> 1430 modules transformed.
-> dist/index.html                                            0.42 kB
-> dist/assets/midnight_onchain_runtime_wasm_bg-*.wasm     1,398.94 kB
-> dist/assets/midnight_ledger_wasm_bg-*.wasm             10,143.78 kB
-> dist/assets/index-*.css                                     1.75 kB
-> dist/assets/index-*.js                                 1,113.33 kB
-> built in ~30s
-
-Notes:
-- The two .wasm bundles are the Midnight ledger + on-chain runtime (expected size).
-- The "500 kB chunk" warning is from those WASM-adjacent bundles and is harmless.
-- dist/zk/counter/{keys,zkir} are served statically for FetchZkConfigProvider.
-- Typecheck (tsc --noEmit) passes clean before every build.
+✓ 1430 modules transformed.
+dist/assets/midnight_ledger_wasm_bg-*.wasm   ~10,144 kB
+dist/assets/index-*.js                        1,112.61 kB │ gzip: 308.44 kB
+dist/assets/index-*.css                         1.75 kB │ gzip:   0.72 kB
+✓ built in ~7s

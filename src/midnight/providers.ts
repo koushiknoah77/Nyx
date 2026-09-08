@@ -17,7 +17,6 @@ import {
 import {
   FALLBACK_INDEXER,
   FALLBACK_INDEXER_WS,
-  FIXED_STEP,
   NETWORK_ID,
   PREPROD_CONTRACT_ADDRESS,
   PRIVATE_STATE_ID,
@@ -35,15 +34,14 @@ export interface CounterView {
 let compiledCache: unknown = null;
 
 /** Compiled counter with LOCAL witnesses. Dummy values are never used here:
- * userSecret comes from this browser's localStorage, step is always FIXED_STEP.
+ * userSecret comes from this browser's localStorage; the increment is the
+ * contract's public constant 1.
  * Neither value is ever rendered in the UI. */
-export async function getCompiledContract(): Promise<never> {
-  if (compiledCache) return compiledCache as never;
+export async function getCompiledContract(): Promise<unknown> {
+  if (compiledCache) return compiledCache;
   const witnesses = {
     userSecret: ({ privateState }: { privateState: unknown }) =>
       [privateState, getOwnerSecret()] as [unknown, Uint8Array],
-    secretStep: ({ privateState }: { privateState: unknown }) =>
-      [privateState, FIXED_STEP] as [unknown, bigint],
   };
   compiledCache = CompiledContract.make('counter', Contract).pipe(
     CompiledContract.withWitnesses(witnesses as never),
@@ -51,7 +49,7 @@ export async function getCompiledContract(): Promise<never> {
     // kept so the CompiledContract type resolves fully.
     CompiledContract.withCompiledFileAssets(ZK_BASE_PATH as never),
   );
-  return compiledCache as never;
+  return compiledCache;
 }
 
 export interface NyxProviders {
