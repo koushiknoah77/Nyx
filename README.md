@@ -1,136 +1,103 @@
-<div align="center">
+# Nyx — private counter on Midnight
 
-# 🌑 Nyx
+> Seniors prove their offer count. Nobody sees their salary. Numbers you can't inflate.
 
-### I got tired of fake placement stats. So I'm putting real ones on-chain.
+Midnight Builder Challenge — Level 2 (Frontend Integration). Built on Level 1 counter.
 
-*Seniors prove their offers count. Nobody sees their salary. The numbers can't be inflated.*
+Repo: https://github.com/koushiknoah77/Nyx
 
-[![Midnight](https://img.shields.io/badge/Midnight-Preprod-0f172a?style=for-the-badge&logo=data:image/svg+xml;base64,000000)](https://docs.midnight.network)
-[![Compact](https://img.shields.io/badge/Compact-0.31.1-7c3aed?style=for-the-badge)](https://docs.midnight.network/compact)
-[![Node](https://img.shields.io/badge/Node-22-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
-[![Tests](https://img.shields.io/badge/Tests-4_passing-16a34a?style=for-the-badge)](tests/counter.test.ts)
-[![Frontend](https://img.shields.io/badge/Frontend-React_Vite-61dafb?style=for-the-badge)](src/App.tsx)
-[![CI](https://img.shields.io/github/actions/workflow/status/koushiknoah77/Nyx/ci.yml?branch=main&style=for-the-badge&logo=github)](https://github.com/koushiknoah77/Nyx/actions)
-[![Deployed](https://img.shields.io/badge/Deployed-Preprod-2563eb?style=for-the-badge)](#-contract-address)
-[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+## Live Demo
 
-*Midnight Builder Challenge - Level 2 · Frontend Integration*
-
-</div>
-
----
-
-## 🎬 Live Demo
 [PASTE LIVE URL AFTER DEPLOYING FRONTEND]
 
-The live app talks to the Preprod contract below. You will need the Lace wallet
-on the Preprod network to click through it.
+This URL talks to the Preprod contract below. You need Lace wallet on Preprod to click through it. Local dev is `http://localhost:5173`.
 
-## 📍 Contract Address
+## Contract Address
+
 | Network | Address |
 |---------|------------------------------------------------------------------|
 | Preprod | 3cec0caf86e0daf71868051c301f9c7841586963c3063ba3b232835ef304ff4f |
 | Preview | 6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1 |
 
-> Preprod redeployed on 2026-09-08 for the privacy-first increment (constant +1,
-> no step disclosure). Preview deployed on
-> 2026-09-07 for Level 1. Deployer wallets live in local `.midnight-state.json`
-> (gitignored).
+Preprod was redeployed on 2026-09-08 for the final design (constant +1, no step disclosure). Preview was the Level 1 deploy on 2026-09-07. Deployer wallets live in local `.midnight-state.json`, gitignored, never committed.
 
----
+## What This Does
 
-## ✨ What This Does
+Plain version: it's a counter with a secret.
 
-This is a counter with a secret. Anyone can read the total and how much each increment moved it. Only the owner can move it. And nobody - not me, not you, not someone staring at the chain explorer - can see the secret behind it or who moved it.
+Anyone can read the total. Only the owner can increment it. Nobody watching the chain — or the UI — can see the secret or who the owner is.
 
-I built it as the foundation for OfferStats (see Initial Idea): honest campus placement numbers where seniors prove offers without showing salaries. The counter is the smallest possible version of that machine - public totals, private inputs, proofs in between.
-
-Since Level 2 it has a face. The dApp in `src/` connects your Lace wallet on Preprod, reads the public total straight from the chain, and lets you initialize the counter or increment it with one click. The proof generates locally in your wallet - the secret never leaves your browser, the increment is the public constant 1 - there is no step input anywhere in the app, and every call carries the label it earns: "Proved without revealing your input."
+Two circuits, that's it:
 
 | Circuit | What happens |
 |---------|--------------|
-| `init()` | One-time setup - locks the counter to the owner's secret commitment |
-| `increment()` | Owner-only +1 - the constant increment moves the public total; the secret stays hidden |
+| `init()` | One-time setup. Locks the counter to your secret commitment. |
+| `increment()` | Owner-only +1. Moves the public total, hides everything else. |
 
-No constructor args. Deploy runs the implicit constructor, then `init` is the first circuit call.
+No constructor args. Deploy runs the implicit constructor, `init` is the first real call.
 
-Roadmap: L2/L3 grows this into offer-bracket counters with nullifier sets - one offer, one count, no fakes.
+I built this as the smallest possible version of OfferStats (see Initial Idea below). Same shape: public aggregates, private inputs, proof in the middle. If this counter is honest, the bigger stats machine can be honest too.
 
----
+The frontend in `src/` is a React + Vite dApp. Connect Lace on Preprod, it reads the public total from the indexer, you click Initialize once then Increment. Proof generates locally in your wallet. Every call is labeled what it is: "Proved without revealing your input."
 
-## 🔐 Privacy Model
+## Privacy Model
 
-- What is PUBLIC (on-chain, visible to anyone):
-  - `count` - the running total. This is the whole point: the world gets to see the number.
-  - the increment - a public **constant 1**. There is no step input to hide; each call moves the total by exactly one.
-  - `owner` - a hash commitment (`persistentHash("campus-counter:owner:v1" || secret)`). It says *someone* owns this counter without saying who.
+- What is PUBLIC (on-chain, anyone can see it):
+  - `count` — the running total. That's the point, the world gets the number.
+  - The increment — it's the constant `1`. There is no step input, nothing to hide there. Each call moves the total by exactly one.
+  - `owner` — a hash commitment, `persistentHash("campus-counter:owner:v1" || secret)`. Proves *someone* owns it without saying who.
 - What is PRIVATE (never on-chain, never in the UI):
-  - `userSecret()` - the owner's 32-byte secret. Lives on their device. Dies with their device.
-  - The person behind the proof - ownership is a zero-knowledge check, not a wallet check, so the proof never names the caller.
+  - `userSecret()` — the owner's 32-byte secret. Generated in your browser, stored in localStorage, never rendered anywhere.
+  - Who called — ownership is a ZK check, not a wallet-address check. The proof doesn't name the caller.
 - What the user PROVES without revealing:
-  - "I know the secret behind this counter" - without showing it.
+  - "I know the secret behind this counter." That's the whole statement. No salary, no identity, no extra metadata.
 
-`disclose()` shows up exactly once in my code, on purpose: the owner commitment at `init`. The increment is the constant 1 - there is nothing else to disclose, and the secret itself is never disclosed. That's the entire philosophy of this project in one line of code.
+On the Compact side, `disclose()` appears exactly once, at `init`, for the owner commitment. I tried the obvious thing first — passing a step value and disclosing the new total — and the privacy checker rightfully rejected it. Making the increment a public constant is what makes the design clean: there is simply nothing else to disclose, and the secret is never disclosed.
 
 ```mermaid
 flowchart LR
-    A["🔑 userSecret<br/>(private witness)"] --> C{"init()"}
-    C -->|"disclose(owner)"| E[("⛓️ Ledger<br/>count + owner")]
+    A["userSecret (private witness)"] --> C{"init()"}
+    C -->|"disclose(owner)"| E[("Ledger: count + owner")]
     D{"increment()"} -->|"count += 1 (public constant)"| E
-    A -.->|"never on-chain"| F["🚫"]
+    A -.->|"never on-chain"| F["not visible"]
 ```
 
----
+## Privacy Claim
 
-## 🔒 Privacy Claim
+Watch my Preprod contract on-chain and here's all you get: the running total and an owner commitment sitting in storage. Each transaction moves the total by 1. Full list, nothing else.
 
-An on-chain observer watching my Preprod contract sees two things: the running
-total and an owner commitment sitting in storage. The increment amount is the
-public constant 1 - each call moves the total by exactly one. That is the
-complete list.
+What you don't get: the 32-byte secret, or who proved. The commitment shows someone who knows the secret made the call. It never says who.
 
-What they can never see: the owner's 32-byte secret, or the person behind the
-proof - the commitment proves *someone* who knows the secret called, and never
-says who. The UI upholds the same rule - there is no input field for secrets
-anywhere in the app - there is no step field at all, because the increment is a
-public constant. Every call carries the label it earns: "Proved without
-revealing your input."
+The UI holds the same line. There is no secret field. There isn't even a step field, because there's no step to enter. Bro, you literally cannot leak your input — there's nowhere to type it.
 
----
+## Tech Stack
 
-## 🛠️ Tech Stack
-
-| Layer | Choice |
-|-------|--------|
-| Network | Midnight Preprod (dApp + contract) · Preview (L1 history) |
-| Contract language | Compact 0.31.1 (language 0.23.0, `pragma language_version >= 0.23`) |
+| Layer | What I used |
+|-------|-------------|
+| Network | Midnight Preprod for the dApp, Preview for L1 history |
+| Contract | Compact 0.31.1, language 0.23.0 (`pragma language_version >= 0.23`) |
 | Runtime | `@midnight-ntwrk/compact-runtime` 0.16.0 |
-| Framework | `@midnight-ntwrk/midnight-js-*` 4.1.1 · `@midnight-ntwrk/wallet-sdk` 1.2.0 |
+| SDK | `@midnight-ntwrk/midnight-js-*` 4.1.1, `@midnight-ntwrk/wallet-sdk` 1.2.0 |
 | Proving | `midnightntwrk/proof-server:8.1.0` on port 6300 |
-| Frontend | React 19 + Vite 7 · Lace wallet via DApp Connector API 4.0.1 · proving delegated to wallet |
-| App | Node.js v22 (WSL Ubuntu) · TypeScript · Vitest |
+| Frontend | React 19 + Vite 7, Lace via DApp Connector API 4.0.1, proving delegated to wallet |
+| Tooling | Node.js v22 in WSL Ubuntu, TypeScript, Vitest |
 
-Versions follow the official support matrix: https://docs.midnight.network/relnotes/support-matrix - I learned the hard way that anything else breaks the deploy. Ask me about compiler 0.34 sometime. Actually don't.
+Stick to the support matrix: https://docs.midnight.network/relnotes/support-matrix. I burned half a day on compiler 0.34 + runtime 0.19 before I learned that lesson. 0.31.1 + 0.16.0 is the pair that actually deploys.
 
----
+## Prerequisites
 
-## 📋 Prerequisites
+Do all of this in **WSL Ubuntu**. PowerShell will waste your time — `compact` up there resolves to Windows disk compression, I'm not kidding.
 
-You need three things. All of them run in **WSL Ubuntu** - Windows PowerShell will betray you (my `compact` command resolved to a Windows disk-compression tool; true story).
-
-- **Node.js v22**: `nvm use 22` ([why WSL](https://docs.midnight.network/guides/windows-compact-setup))
-- **Docker** with the proof server on port 6300:
+- Node.js v22: `nvm use 22`. Guide if you need it: https://docs.midnight.network/guides/windows-compact-setup
+- Docker + proof server:
 ```bash
 docker run -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v
 ```
-- **Compact toolchain**: `compact update 0.31.1`, check with `compact compile --version`
-- **A funded Preview wallet** for deploy (faucet: https://midnight-tmnight-preview.nethermind.dev). My deploy script reuses `MIDNIGHT_WALLET_SEED` if you set it, otherwise it makes you a wallet and waits while you fund it.
-- **Lace wallet** (Chrome extension) for the frontend demo, switched to the Preprod network.
+- Compact toolchain: `compact update 0.31.1`, verify with `compact compile --version`
+- A funded wallet for deploys. Faucets: Preview https://midnight-tmnight-preview.nethermind.dev, Preprod https://midnight-tmnight-preprod.nethermind.dev. My deploy script reuses `MIDNIGHT_WALLET_SEED` if you set it, otherwise it prints an address and waits for you to fund it.
+- Lace wallet (Chrome extension), switched to Preprod, for the frontend.
 
----
-
-## 🚀 Setup
+## Setup
 
 ```bash
 git clone https://github.com/koushiknoah77/Nyx.git
@@ -139,47 +106,42 @@ npm install
 npm run compile   # compact compile contracts/counter.compact managed/counter
 ```
 
-## 🏃 Run Locally
+## Run Locally
 
 ```bash
 git clone https://github.com/koushiknoah77/Nyx.git
 cd Nyx
 npm install
-npm run dev   # Vite at http://localhost:5173
+npm run dev   # http://localhost:5173
 ```
 
-Then install the Lace wallet extension, switch it to Preprod, open the app and
-connect. For local proving, point Lace at a local proof server (Lace Settings,
-Midnight section) with Docker running:
-`docker run -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v`.
+Then: install Lace, switch it to Preprod, open the app, hit Connect. If proving hangs, check Lace Settings → Midnight section → point it at your local proof server (the docker command above).
 
-## 🧪 Run Tests
+## Run Tests
 
 ```bash
-npm test   # vitest run - 4 tests: circuit logic, state transitions, privacy
+npm test   # vitest run — 4 tests
 ```
 
-Four tests, all green: init binds the owner, increments accumulate by the constant 1, strangers get rejected, and raw secrets never appear in public state. If any of that breaks, nothing else I build on top matters.
+What they cover: init binds the owner commitment deterministically, increments accumulate (3 calls → 3), a wrong secret gets rejected with `not owner`, and raw secret bytes never show up in public state. If any of that breaks, nothing built on top matters.
 
-## 📦 Deploy
+## Deploy
 
 ```bash
-# Contracts (Preview for L1, Preprod for L2 - first run prints a faucet address and waits)
+# Contracts. First run prints a faucet address and waits for funding.
 MIDNIGHT_WALLET_SEED=<funded-seed> npx tsx scripts/deploy-counter.ts --network preview
 MIDNIGHT_WALLET_SEED=<funded-seed> npx tsx scripts/deploy-counter.ts --network preprod
 ```
 
 ```bash
 # Frontend
-npm run dev       # Vite at http://localhost:5173
-npm run build     # typecheck + production bundle into dist/
+npm run dev     # local dev
+npm run build   # typecheck + production bundle into dist/
 ```
 
-Records the address in `.midnight-state.json` (gitignored). Wallet sync state lives in `.midnight-wallet-state/` (gitignored). Pro tip I wish someone gave me: back up `.midnight-wallet-state` - without it every deploy re-syncs from genesis and you'll watch paint dry for 10 minutes.
+Deploy records the address in `.midnight-state.json` (gitignored). Wallet sync lives in `.midnight-wallet-state/` (gitignored). Back that folder up — without it every deploy resyncs from genesis and you'll sit there 10 minutes wondering if it's stuck.
 
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```text
 contracts/counter.compact   # the Compact contract
@@ -191,81 +153,72 @@ vite.config.ts              # WASM + node-polyfill browser config
 vercel.json                 # SPA rewrites for hosting
 public/zk/counter/          # ZK artifacts served to the browser (keys/, zkir/)
 tests/counter.test.ts       # 4 vitest tests
-docs/l4-idea.md             # L4 idea submission overview (track + mapping)
+docs/l4-idea.md             # L4 idea submission overview
 docs/l2-demo.md             # demo video script (four required shots)
 docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.txt)
 ```
 
-## ✅ Verify
+## Verify
 
 ```bash
-npx tsc --noEmit        # typecheck, must be clean
-npm run compile         # must print "Compiling 2 circuits"
-npm test                # must print "Tests 4 passed (4)"
-npm run build           # typecheck + Vite bundle into dist/
+npx tsc --noEmit      # must be clean
+npm run compile       # must print "Compiling 2 circuits"
+npm test              # must print "Tests 4 passed (4)"
+npm run build         # typecheck + Vite bundle into dist/
 ```
 
-## 🗺️ Roadmap
+Last verified on my machine: tsc clean, 2 circuits, 4/4 tests, 1430 modules built in ~28s. The 500 kB+ chunk warning is normal — ledger WASM is just big.
 
-Where I'm taking this, level by level:
+## Roadmap
 
 | Level | Plan |
 |-------|------|
-| L2 (done) | Counter frontend on Preprod: Lace connect, browser circuit calls, local proving |
-| L3 | Production-grade: tests, CI/CD, idea approved against the problem list |
-| L4 | MVP live on Preprod. Track: Consumer & Social. Builds on Age / Eligibility Gate + Confidential Credentials (full writeup: `docs/l4-idea.md`) |
-| L5 | 50 Preprod users from one placed batch + a living feedback loop |
-| L6 | Mainnet deploy, brand assets, 20 real users |
+| L2 (done) | Counter + frontend on Preprod: Lace connect, browser circuit calls, local proving |
+| L3 | Production-grade: CI passing, idea approved against the problem list |
+| L4 | MVP live on Preprod. Track: Consumer & Social. OfferStats writeup in `docs/l4-idea.md` |
+| L5 | 50 Preprod users from one placed batch + feedback loop |
+| L6 | Mainnet, brand assets, 20 real users |
 
----
+## Troubleshooting
 
-<details>
-<summary><b>🆘 Troubleshooting (scars I earned so you don't have to)</b></summary>
+Stuff I actually hit, so you don't have to:
 
-- `compact: command not found` in PowerShell → you're in the wrong shell. WSL Ubuntu. `compact` only lives at `~/.local/bin/compact` in there.
-- `Failed to update / Expecting a file .../compactc` → WSL is missing `unzip`, so the toolchain download never extracts. Install unzip, delete `~/.compact/versions/<ver>`, re-run `compact update <ver>`, `chmod +x` the binaries.
-- `does not contain a function-valued field named userSecret` → I hit this because my contract HAS witnesses and I deployed with `withVacantWitnesses`. Use `CompiledContract.withWitnesses(...)` with dummy witnesses for deploy.
-- `expected instance of ContractMaintenanceAuthority` → your compiler and runtime are from different eras. The pair that works: compiler 0.31.1 + runtime 0.16.0. Not 0.34.0 + 0.19.0. The support matrix is law.
-- Preview sync takes 5+ minutes on first run → normal. Copy a same-seed `.midnight-wallet-state/preview/` over to resume instantly, or make tea.
-- Frontend says no wallet found → install Lace, enable it, refresh. It reads wallets from `window.midnight`, and a fresh install only injects after a reload.
-- Wallet is on the wrong network → the app tells you which one Lace is on. Switch Lace to Preprod and reconnect.
-- Proving hangs in the browser → Lace must point at a reachable prover. For the demo I run the local proof server on 6300 and select Local in Lace Settings, Midnight section.
-- Vite warns about 500 kB+ chunks → expected. The ledger WASM bundles are megabytes by nature; the warning is noise.
+- `compact: command not found` in PowerShell → wrong shell. Use WSL. `compact` lives at `~/.local/bin/compact` in there.
+- `Failed to update / Expecting a file .../compactc` → WSL is missing `unzip`. Install it, delete `~/.compact/versions/<ver>`, re-run `compact update <ver>`, `chmod +x` the binaries.
+- `does not contain a function-valued field named userSecret` → contract has witnesses but you deployed with `withVacantWitnesses`. Use `CompiledContract.withWitnesses(...)`.
+- `expected instance of ContractMaintenanceAuthority` → compiler/runtime mismatch. Use 0.31.1 + 0.16.0. Check the matrix.
+- First sync takes 5+ minutes → normal. Reuse a same-seed `.midnight-wallet-state/<net>/` to skip it.
+- Frontend says no wallet → install Lace, refresh the page. It reads `window.midnight`, fresh installs only inject after reload.
+- Wrong network → the app tells you what Lace is on. Switch Lace to Preprod, reconnect.
+- Proving hangs → Lace needs a reachable prover. Run the local proof server, select Local in Lace Midnight settings.
 
-</details>
+## Initial Idea
 
----
+Every admission season my college publishes placement stats that smell wrong. 100% placed, huge medians. Every junior knows someone's cooking the books, but nobody can prove it — because the raw data (who got what) is private and should stay private. So the lie survives because the truth can't be shown.
 
-## 💡 Initial Idea
+That's what I'm building OfferStats to kill.
 
-Let me tell you what I actually saw. Every admission season, colleges publish placement stats that smell wrong - 100% placed, sky-high medians - and every junior on campus knows someone's cooking the books. Nobody can prove it, because the raw data (who got what offer) is private and should stay private. So the lie survives on the fact that the truth can't be shown.
+Placed seniors prove their offers count toward honest stats without showing salary. Offer commitment + nullifier means one offer = one count. No double-counting, no invented entries. The chain publishes aggregates only: median CTC, % placed, bracket counts. No names, no exact salaries.
 
-That's the thing I'm building OfferStats to kill.
+Why students use it: seniors get verified flex (status matters on campus), juniors get real numbers instead of brochure fiction. I'm not selling privacy, privacy is the engine. I'm selling truth and bragging rights.
 
-Here's the idea: placed seniors prove their offers count toward honest stats without anyone seeing their salary. An offer-letter commitment plus a nullifier means one offer = one count - no double-counting, no invented entries. The chain publishes only aggregates: median CTC, % placed, bracket counts. No names. No exact salaries. Nothing to inflate, because every number traces back to a proof.
+Why colleges pay: credible placement data is their #1 admission pitch. "Stats nobody can inflate" as Edtech SaaS, not a toy.
 
-Why will students actually touch it? Seniors get to flex verified placements (status is a hell of a drug), juniors finally get true numbers instead of brochure fiction. I'm not selling privacy - privacy is the engine. I'm selling truth and bragging rights.
+First 50 users: one placed batch. Classmates with offers prove, juniors verify. Phones in a classroom, gasless via DUST sponsorship so testers never see a seed phrase or gas fee.
 
-Why will colleges pay? Credible placement data is their #1 admission marketing. My pitch to them: "stats nobody can inflate." Edtech SaaS, not a toy.
+Later the same nullifier-bracket pattern stretches to internships, hackathon wins, any countable credential.
 
-My first 50 users are one placed batch. Classmates with offers prove, juniors verify - phones in a classroom, gasless through DUST sponsorship so no tester ever sees a seed phrase or a gas fee. No venue deals. No door hardware. Just people who already care.
+This counter is the seed. Owner-bound increments become one-nullifier-one-count brackets. The ownership proof becomes a CTC-threshold predicate. `count` becomes per-bracket public totals. Small now, honest later.
 
-Later, the same nullifier-bracket pattern stretches to internships, hackathon wins, any countable credential.
+## Demo Video
 
-And this Level 1 counter? It's the seed of all that. Owner-bound increments become one-nullifier-one-count offer brackets. The ownership proof becomes a CTC-threshold predicate. `count` becomes per-bracket public totals. Small now, honest later.
+[PLACEHOLDER — I will add the link after recording]
 
----
+Under 2 minutes, four shots: connect Lace and show the address, call the circuit and show local proof generation, show the on-chain result, point out the private input was never shown. Full script: `docs/l2-demo.md`.
 
-## 🎥 Demo Video
-[PLACEHOLDER - I will add the link after recording]
+## Screenshots
 
-Planned shots (under 2 minutes): connect Lace and show the address, call the
-circuit and show local proof generation, show the on-chain result, point out the
-private input was never shown. Full script: `docs/l2-demo.md`.
-
-## 📸 Screenshots
-
-Terminal captures live under `docs/screenshots/`. To add PNGs: screenshot your own terminal and save as `docs/screenshots/compile.png`, `tests.png`, `deploy.png`.
+Terminal captures live under `docs/screenshots/`. PNGs go next to them as `compile.png`, `tests.png`, `deploy.png`.
 
 ### Compile (`docs/screenshots/compile.txt`)
 ```text
@@ -276,7 +229,7 @@ Compiling 2 circuits:
 syncify-managed: nothing to change
 ```
 
-### Tests - 4 passing (`docs/screenshots/tests.txt`)
+### Tests — 4 passing (`docs/screenshots/tests.txt`)
 ```text
  ✓ tests/counter.test.ts (4 tests)
 
@@ -284,7 +237,7 @@ syncify-managed: nothing to change
       Tests  4 passed (4)
 ```
 
-### Deploy - Preprod contract address (`docs/screenshots/deploy.txt`)
+### Deploy — Preprod contract address (`docs/screenshots/deploy.txt`)
 ```text
 Contract Address: 3cec0caf86e0daf71868051c301f9c7841586963c3063ba3b232835ef304ff4f
 ```
@@ -297,20 +250,16 @@ dist/assets/index-*.js                        1,113.33 kB
 built in ~30s
 ```
 
----
+## Links
 
-## 🔗 Links
+- Repo: https://github.com/koushiknoah77/Nyx
+- Midnight docs: https://docs.midnight.network
+- Support matrix: https://docs.midnight.network/relnotes/support-matrix
+- Windows setup: https://docs.midnight.network/guides/windows-compact-setup
+- Preview faucet: https://midnight-tmnight-preview.nethermind.dev
+- Preprod faucet: https://midnight-tmnight-preprod.nethermind.dev
+- Lace wallet: https://chromewebstore.google.com/detail/lace/gafhhkghbfjjkeiendhlofajokpaflmk
 
-| | |
-|---|---|
-| Repo | https://github.com/koushiknoah77/Nyx |
-| Midnight docs | https://docs.midnight.network |
-| Support matrix | https://docs.midnight.network/relnotes/support-matrix |
-| Windows setup | https://docs.midnight.network/guides/windows-compact-setup |
-| Preview faucet | https://midnight-tmnight-preview.nethermind.dev |
-| Preprod faucet | https://midnight-tmnight-preprod.nethermind.dev |
-| Lace wallet | https://chromewebstore.google.com/detail/lace/gafhhkghbfjjkeiendhlofajokpaflmk |
+## License
 
-## 📄 License
-
-MIT - do what you want with it. If you fix my circuits, send a PR.
+MIT — do what you want with it. If you fix my circuits, send a PR.

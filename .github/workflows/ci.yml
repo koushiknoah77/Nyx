@@ -9,28 +9,31 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
       # Official Compact devtools install (docs.midnight.network/relnotes/compact):
       # devtools manage the toolchain; compact update pins the support-matrix version.
+      # NOTE: the installer drops the binary at $HOME/.local/bin with no `env`
+      # file, so export PATH directly (and persist via GITHUB_PATH for later steps).
       - name: Install Compact toolchain (0.31.1)
         run: |
           curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/download/compact-v0.5.1/compact-installer.sh | sh
-          source "$HOME/.local/bin/env"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.local/bin:$PATH"
           compact update 0.31.1
-          compact --version
+          compact compile --version
 
       - name: Install dependencies
         run: npm ci
 
       - name: Compile contract
         run: |
-          source "$HOME/.local/bin/env"
+          export PATH="$HOME/.local/bin:$PATH"
           npm run compile
 
       - name: Typecheck
