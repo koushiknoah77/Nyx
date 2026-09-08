@@ -190,7 +190,7 @@ index.html                  # Vite entry
 vite.config.ts              # WASM + node-polyfill browser config
 vercel.json                 # SPA rewrites for hosting
 public/zk/counter/          # ZK artifacts served to the browser (keys/, zkir/)
-tests/counter.test.ts       # 5 vitest tests
+tests/counter.test.ts       # 4 vitest tests
 docs/l4-idea.md             # L4 idea submission overview (track + mapping)
 docs/l2-demo.md             # demo video script (four required shots)
 docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.txt)
