@@ -21,10 +21,8 @@
 
 ## 📍 Contract Address
 | Network | Address |
-|----------|----------------------------------|
+|---------|------------------------------------------------------------------|
 | Preview | 6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1 |
-| Preprod | [PASTE ADDRESS AFTER DEPLOY] |
-(This section is MANDATORY. Leave placeholders if not deployed yet.)
 
 > Deployed to Preview on 2026-09-07 from wallet `mn_addr_preview1g9d...aphuue`
 > (full address lives in local `.midnight-state.json`, gitignored).
