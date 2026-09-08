@@ -156,9 +156,19 @@ npm test                # must print "Tests 5 passed (5)"
 
 ## 💡 Initial Idea
 
-Campus clubs and canteens need to check eligibility (enrolled student, age 18+, meal-credit threshold) without collecting ID cards, birth dates, or grades. The end goal is a campus pass where a student proves "I qualify" in zero knowledge and only a pass/fail plus a nullifier goes on-chain.
+**Problem:** campus venues get fined for underage entry, and students hate handing their ID to a stranger at the door. Existing checkers either stare at a birth date (slow, creepy) or store student IDs in a database (a breach waiting to happen).
 
-This Level 1 counter is the minimal version of that pattern: `count` and an owner commitment are public, while the secret and each increment (1-10) stay private as witnesses. `init` binds the counter to `ownerOf(secret)` and `increment` proves ownership plus range, disclosing only the new total. Level 2 will put a frontend on top; later levels extend the same shape to real eligibility attributes.
+**Product:** Nyx is tap-to-prove event entry. A student proves "18+" (or "enrolled") in ~10 seconds without showing any ID. The organizer gets a compliance log with zero personal data stored.
+
+**Why students will actually use it:** skip the ID queue, never hand your license to a bouncer, access 18+ zones, plus perks (drink tokens, discounts). Privacy is the engine, not the sales pitch.
+
+**Why organizers pay:** fine avoidance, faster entry, and no breach liability — "we can't leak what we don't hold." Per-event SaaS plus a verification API.
+
+**Getting the first 50 users:** distribution comes through organizers, not app-store downloads. 2-3 campus events mandate or fast-lane Nyx at entry; one 200-person fest converts 25% and L5's 50-tester requirement is done — doubling as our validation cohort. Gasless via DUST sponsorship so testers never touch crypto UX.
+
+**Later:** the same credential extends to exam halls, canteens, and club memberships.
+
+This Level 1 counter is the minimal version of that pattern: `count` and an owner commitment are public, while the secret and each increment (1-10) stay private as witnesses. `init` binds the counter to `ownerOf(secret)` and `increment` proves ownership plus range, disclosing only the new total.
 
 ---
 
