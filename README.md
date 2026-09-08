@@ -13,7 +13,7 @@
 [![Deployed](https://img.shields.io/badge/Deployed-Preview-2563eb?style=for-the-badge)](#-contract-address)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-*Midnight Builder Challenge — Level 1 · Setup & First Contract*
+*Midnight Builder Challenge - Level 1 · Setup & First Contract*
 
 </div>
 
@@ -31,32 +31,32 @@
 
 ## ✨ What This Does
 
-This is a counter with a secret. Anyone can read the total. Only the owner can move it. And nobody — not me, not you, not someone staring at the chain explorer — can see the individual steps.
+This is a counter with a secret. Anyone can read the total. Only the owner can move it. And nobody - not me, not you, not someone staring at the chain explorer - can see the individual steps.
 
-I built it as the foundation for OfferStats (see Initial Idea): honest campus placement numbers where seniors prove offers without showing salaries. The counter is the smallest possible version of that machine — public totals, private inputs, proofs in between.
+I built it as the foundation for OfferStats (see Initial Idea): honest campus placement numbers where seniors prove offers without showing salaries. The counter is the smallest possible version of that machine - public totals, private inputs, proofs in between.
 
 | Circuit | What happens |
 |---------|--------------|
-| `init()` | One-time setup — locks the counter to the owner's secret commitment |
-| `increment()` | Owner-only private step (1-10) — reveals **only the new total** |
+| `init()` | One-time setup - locks the counter to the owner's secret commitment |
+| `increment()` | Owner-only private step (1-10) - reveals **only the new total** |
 
 No constructor args. Deploy runs the implicit constructor, then `init` is the first circuit call.
 
-Roadmap: L2/L3 grows this into offer-bracket counters with nullifier sets — one offer, one count, no fakes.
+Roadmap: L2/L3 grows this into offer-bracket counters with nullifier sets - one offer, one count, no fakes.
 
 ---
 
 ## 🔐 Privacy Model
 
 - What is PUBLIC (on-chain, visible to anyone):
-  - `count` — the running total. This is the whole point: the world gets to see the number.
-  - `owner` — a hash commitment (`persistentHash("campus-counter:owner:v1" || secret)`). It says *someone* owns this counter without saying who.
+  - `count` - the running total. This is the whole point: the world gets to see the number.
+  - `owner` - a hash commitment (`persistentHash("campus-counter:owner:v1" || secret)`). It says *someone* owns this counter without saying who.
 - What is PRIVATE (private witness, never on-chain):
-  - `userSecret()` — the owner's 32-byte secret. Lives on their device. Dies with their device.
-  - `secretStep()` — the increment amount (1-10). Nobody's business but the owner's.
+  - `userSecret()` - the owner's 32-byte secret. Lives on their device. Dies with their device.
+  - `secretStep()` - the increment amount (1-10). Nobody's business but the owner's.
 - What the user PROVES without revealing:
-  - "I know the secret behind this counter" — without showing it.
-  - "My step is between 1 and 10" — without saying which.
+  - "I know the secret behind this counter" - without showing it.
+  - "My step is between 1 and 10" - without saying which.
 
 `disclose()` shows up exactly twice in my code, and both times on purpose: the owner commitment at `init`, the new total at `increment`. Everything else stays in the dark. That's the entire philosophy of this project in two lines of code.
 
@@ -83,13 +83,13 @@ flowchart LR
 | Proving | `midnightntwrk/proof-server:8.1.0` on port 6300 |
 | App | Node.js v22 (WSL Ubuntu) · TypeScript · Vitest |
 
-Versions follow the official support matrix: https://docs.midnight.network/relnotes/support-matrix — I learned the hard way that anything else breaks the deploy. Ask me about compiler 0.34 sometime. Actually don't.
+Versions follow the official support matrix: https://docs.midnight.network/relnotes/support-matrix - I learned the hard way that anything else breaks the deploy. Ask me about compiler 0.34 sometime. Actually don't.
 
 ---
 
 ## 📋 Prerequisites
 
-You need three things. All of them run in **WSL Ubuntu** — Windows PowerShell will betray you (my `compact` command resolved to a Windows disk-compression tool; true story).
+You need three things. All of them run in **WSL Ubuntu** - Windows PowerShell will betray you (my `compact` command resolved to a Windows disk-compression tool; true story).
 
 - **Node.js v22**: `nvm use 22` ([why WSL](https://docs.midnight.network/guides/windows-compact-setup))
 - **Docker** with the proof server on port 6300:
@@ -125,7 +125,7 @@ Five tests, all green: init binds the owner, increments accumulate (3+10+1=14), 
 MIDNIGHT_WALLET_SEED=<funded-preview-seed> npx tsx scripts/deploy-counter.ts --network preview
 ```
 
-Records the address in `.midnight-state.json` (gitignored). Wallet sync state lives in `.midnight-wallet-state/` (gitignored). Pro tip I wish someone gave me: back up `.midnight-wallet-state` — without it every deploy re-syncs from genesis and you'll watch paint dry for 10 minutes.
+Records the address in `.midnight-state.json` (gitignored). Wallet sync state lives in `.midnight-wallet-state/` (gitignored). Pro tip I wish someone gave me: back up `.midnight-wallet-state` - without it every deploy re-syncs from genesis and you'll watch paint dry for 10 minutes.
 
 ---
 
@@ -164,17 +164,17 @@ npm test                # must print "Tests 5 passed (5)"
 
 ## 💡 Initial Idea
 
-Let me tell you what I actually saw. Every admission season, colleges publish placement stats that smell wrong — 100% placed, sky-high medians — and every junior on campus knows someone's cooking the books. Nobody can prove it, because the raw data (who got what offer) is private and should stay private. So the lie survives on the fact that the truth can't be shown.
+Let me tell you what I actually saw. Every admission season, colleges publish placement stats that smell wrong - 100% placed, sky-high medians - and every junior on campus knows someone's cooking the books. Nobody can prove it, because the raw data (who got what offer) is private and should stay private. So the lie survives on the fact that the truth can't be shown.
 
 That's the thing I'm building OfferStats to kill.
 
-Here's the idea: placed seniors prove their offers count toward honest stats without anyone seeing their salary. An offer-letter commitment plus a nullifier means one offer = one count — no double-counting, no invented entries. The chain publishes only aggregates: median CTC, % placed, bracket counts. No names. No exact salaries. Nothing to inflate, because every number traces back to a proof.
+Here's the idea: placed seniors prove their offers count toward honest stats without anyone seeing their salary. An offer-letter commitment plus a nullifier means one offer = one count - no double-counting, no invented entries. The chain publishes only aggregates: median CTC, % placed, bracket counts. No names. No exact salaries. Nothing to inflate, because every number traces back to a proof.
 
-Why will students actually touch it? Seniors get to flex verified placements (status is a hell of a drug), juniors finally get true numbers instead of brochure fiction. I'm not selling privacy — privacy is the engine. I'm selling truth and bragging rights.
+Why will students actually touch it? Seniors get to flex verified placements (status is a hell of a drug), juniors finally get true numbers instead of brochure fiction. I'm not selling privacy - privacy is the engine. I'm selling truth and bragging rights.
 
 Why will colleges pay? Credible placement data is their #1 admission marketing. My pitch to them: "stats nobody can inflate." Edtech SaaS, not a toy.
 
-My first 50 users are one placed batch. Classmates with offers prove, juniors verify — phones in a classroom, gasless through DUST sponsorship so no tester ever sees a seed phrase or a gas fee. No venue deals. No door hardware. Just people who already care.
+My first 50 users are one placed batch. Classmates with offers prove, juniors verify - phones in a classroom, gasless through DUST sponsorship so no tester ever sees a seed phrase or a gas fee. No venue deals. No door hardware. Just people who already care.
 
 Later, the same nullifier-bracket pattern stretches to internships, hackathon wins, any countable credential.
 
@@ -222,4 +222,4 @@ Contract Address: 6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186f
 
 ## 📄 License
 
-MIT — do what you want with it. If you fix my circuits, send a PR.
+MIT - do what you want with it. If you fix my circuits, send a PR.
