@@ -2,7 +2,7 @@
 
 # 🌑 Nyx
 
-### Campus Counter — privacy on Midnight, counted.
+### Privacy-first counter on Midnight.
 
 *Only the owner can increment. The step stays secret. Only the total is ever public.*
 
