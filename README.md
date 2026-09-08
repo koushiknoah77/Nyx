@@ -2,9 +2,9 @@
 
 # 🌑 Nyx
 
-### Privacy-first counter on Midnight.
+### I got tired of fake placement stats. So I'm putting real ones on-chain.
 
-*Only the owner can increment. The step stays secret. Only the total is ever public.*
+*Seniors prove their offers count. Nobody sees their salary. The numbers can't be inflated.*
 
 [![Midnight](https://img.shields.io/badge/Midnight-Preview-0f172a?style=for-the-badge&logo=data:image/svg+xml;base64,000000)](https://docs.midnight.network)
 [![Compact](https://img.shields.io/badge/Compact-0.31.1-7c3aed?style=for-the-badge)](https://docs.midnight.network/compact)
@@ -31,32 +31,34 @@
 
 ## ✨ What This Does
 
-`contracts/counter.compact` keeps a **running total anyone can read**, while the **increments stay private**.
+This is a counter with a secret. Anyone can read the total. Only the owner can move it. And nobody — not me, not you, not someone staring at the chain explorer — can see the individual steps.
+
+I built it as the foundation for OfferStats (see Initial Idea): honest campus placement numbers where seniors prove offers without showing salaries. The counter is the smallest possible version of that machine — public totals, private inputs, proofs in between.
 
 | Circuit | What happens |
 |---------|--------------|
-| `init()` | One-time setup — binds the counter to the owner's secret commitment |
-| `increment()` | Owner-only private step (1–10) — discloses **only the new total** |
+| `init()` | One-time setup — locks the counter to the owner's secret commitment |
+| `increment()` | Owner-only private step (1-10) — reveals **only the new total** |
 
 No constructor args. Deploy runs the implicit constructor, then `init` is the first circuit call.
 
-Roadmap: L2/L3 evolves this contract toward offer-bracket counters with nullifier sets (see Initial Idea).
+Roadmap: L2/L3 grows this into offer-bracket counters with nullifier sets — one offer, one count, no fakes.
 
 ---
 
 ## 🔐 Privacy Model
 
 - What is PUBLIC (on-chain, visible to anyone):
-  - `count` — the running total.
-  - `owner` — a hash commitment (`persistentHash("campus-counter:owner:v1" || secret)`) identifying the owner without revealing the secret.
+  - `count` — the running total. This is the whole point: the world gets to see the number.
+  - `owner` — a hash commitment (`persistentHash("campus-counter:owner:v1" || secret)`). It says *someone* owns this counter without saying who.
 - What is PRIVATE (private witness, never on-chain):
-  - `userSecret()` — the owner's 32-byte secret.
-  - `secretStep()` — the increment amount (1–10).
+  - `userSecret()` — the owner's 32-byte secret. Lives on their device. Dies with their device.
+  - `secretStep()` — the increment amount (1-10). Nobody's business but the owner's.
 - What the user PROVES without revealing:
-  - Knowledge of the secret behind the `owner` commitment.
-  - That the hidden increment is within 1–10.
+  - "I know the secret behind this counter" — without showing it.
+  - "My step is between 1 and 10" — without saying which.
 
-`disclose()` is used deliberately in exactly **two** places — the owner commitment at `init` and the new total on each `increment`. Individual steps and secrets are **never** disclosed.
+`disclose()` shows up exactly twice in my code, and both times on purpose: the owner commitment at `init`, the new total at `increment`. Everything else stays in the dark. That's the entire philosophy of this project in two lines of code.
 
 ```mermaid
 flowchart LR
@@ -81,19 +83,21 @@ flowchart LR
 | Proving | `midnightntwrk/proof-server:8.1.0` on port 6300 |
 | App | Node.js v22 (WSL Ubuntu) · TypeScript · Vitest |
 
-Versions follow the official support matrix: https://docs.midnight.network/relnotes/support-matrix
+Versions follow the official support matrix: https://docs.midnight.network/relnotes/support-matrix — I learned the hard way that anything else breaks the deploy. Ask me about compiler 0.34 sometime. Actually don't.
 
 ---
 
 ## 📋 Prerequisites
 
-- **WSL Ubuntu + Node.js v22**: `nvm use 22` (Windows PowerShell Node is NOT supported — see https://docs.midnight.network/guides/windows-compact-setup)
+You need three things. All of them run in **WSL Ubuntu** — Windows PowerShell will betray you (my `compact` command resolved to a Windows disk-compression tool; true story).
+
+- **Node.js v22**: `nvm use 22` ([why WSL](https://docs.midnight.network/guides/windows-compact-setup))
 - **Docker** with the proof server on port 6300:
 ```bash
 docker run -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v
 ```
-- **Compact toolchain**: `compact update 0.31.1`, verify with `compact compile --version`
-- **A funded Preview wallet** for deploy (faucet: https://midnight-tmnight-preview.nethermind.dev). The deploy script reuses `MIDNIGHT_WALLET_SEED` if set, otherwise generates one and waits for funding.
+- **Compact toolchain**: `compact update 0.31.1`, check with `compact compile --version`
+- **A funded Preview wallet** for deploy (faucet: https://midnight-tmnight-preview.nethermind.dev). My deploy script reuses `MIDNIGHT_WALLET_SEED` if you set it, otherwise it makes you a wallet and waits while you fund it.
 
 ---
 
@@ -112,6 +116,8 @@ npm run compile   # compact compile contracts/counter.compact managed/counter
 npm test   # vitest run - 5 tests: circuit logic, state transitions, privacy
 ```
 
+Five tests, all green: init binds the owner, increments accumulate (3+10+1=14), strangers get rejected, out-of-range steps get rejected, and raw secrets never appear in public state. If any of that breaks, nothing else I build on top matters.
+
 ## 📦 Deploy
 
 ```bash
@@ -119,7 +125,7 @@ npm test   # vitest run - 5 tests: circuit logic, state transitions, privacy
 MIDNIGHT_WALLET_SEED=<funded-preview-seed> npx tsx scripts/deploy-counter.ts --network preview
 ```
 
-Records the address in `.midnight-state.json` (gitignored). Wallet sync state lives in `.midnight-wallet-state/` (gitignored).
+Records the address in `.midnight-state.json` (gitignored). Wallet sync state lives in `.midnight-wallet-state/` (gitignored). Pro tip I wish someone gave me: back up `.midnight-wallet-state` — without it every deploy re-syncs from genesis and you'll watch paint dry for 10 minutes.
 
 ---
 
@@ -144,13 +150,13 @@ npm test                # must print "Tests 5 passed (5)"
 ---
 
 <details>
-<summary><b>🆘 Troubleshooting</b></summary>
+<summary><b>🆘 Troubleshooting (scars I earned so you don't have to)</b></summary>
 
-- `compact: command not found` in PowerShell → use WSL Ubuntu, `compact` only exists there (`~/.local/bin/compact`).
-- `Failed to update / Expecting a file .../compactc` → install `unzip` in WSL, delete `~/.compact/versions/<ver>`, re-run `compact update <ver>`, `chmod +x` the extracted binaries.
-- `does not contain a function-valued field named userSecret` → deploy with `CompiledContract.withWitnesses(...)`, not `withVacantWitnesses` (this contract has witnesses).
-- `expected instance of ContractMaintenanceAuthority` → compiler/runtime mismatch. Use the matrix pair: compiler 0.31.1 + runtime 0.16.0 (this repo), not 0.34.0 + 0.19.0.
-- Preview sync takes 5+ minutes on first run → copy a same-seed `.midnight-wallet-state/preview/` to resume, or just wait.
+- `compact: command not found` in PowerShell → you're in the wrong shell. WSL Ubuntu. `compact` only lives at `~/.local/bin/compact` in there.
+- `Failed to update / Expecting a file .../compactc` → WSL is missing `unzip`, so the toolchain download never extracts. Install unzip, delete `~/.compact/versions/<ver>`, re-run `compact update <ver>`, `chmod +x` the binaries.
+- `does not contain a function-valued field named userSecret` → I hit this because my contract HAS witnesses and I deployed with `withVacantWitnesses`. Use `CompiledContract.withWitnesses(...)` with dummy witnesses for deploy.
+- `expected instance of ContractMaintenanceAuthority` → your compiler and runtime are from different eras. The pair that works: compiler 0.31.1 + runtime 0.16.0. Not 0.34.0 + 0.19.0. The support matrix is law.
+- Preview sync takes 5+ minutes on first run → normal. Copy a same-seed `.midnight-wallet-state/preview/` over to resume instantly, or make tea.
 
 </details>
 
@@ -158,17 +164,21 @@ npm test                # must print "Tests 5 passed (5)"
 
 ## 💡 Initial Idea
 
-Campus placement stats are inflated — everyone knows it, nobody can prove it. OfferStats fixes that: placed seniors prove their offers count toward honest stats without anyone seeing their salary. An offer-letter commitment plus a nullifier means one offer = one count — no double-counting, no fake entries. The chain publishes only aggregates: median CTC, % placed, bracket counts. No names, no exact salaries.
+Let me tell you what I actually saw. Every admission season, colleges publish placement stats that smell wrong — 100% placed, sky-high medians — and every junior on campus knows someone's cooking the books. Nobody can prove it, because the raw data (who got what offer) is private and should stay private. So the lie survives on the fact that the truth can't be shown.
 
-Why students will actually use it: seniors flex verified placements (status), juniors finally see true numbers instead of brochure fiction. Privacy is the engine, not the sales pitch.
+That's the thing I'm building OfferStats to kill.
 
-Why colleges pay: credible placement data is their #1 admission marketing — edtech SaaS, not a toy. The pitch: "stats nobody can inflate."
+Here's the idea: placed seniors prove their offers count toward honest stats without anyone seeing their salary. An offer-letter commitment plus a nullifier means one offer = one count — no double-counting, no invented entries. The chain publishes only aggregates: median CTC, % placed, bracket counts. No names. No exact salaries. Nothing to inflate, because every number traces back to a proof.
 
-Getting the first 50 users: one placed batch. Classmates with offers prove, juniors verify — phones in a classroom, gasless via DUST sponsorship so testers never touch crypto UX. No venue deals, no door hardware.
+Why will students actually touch it? Seniors get to flex verified placements (status is a hell of a drug), juniors finally get true numbers instead of brochure fiction. I'm not selling privacy — privacy is the engine. I'm selling truth and bragging rights.
 
-Later: the same nullifier-bracket pattern extends to internships, hackathon wins, and any countable credential.
+Why will colleges pay? Credible placement data is their #1 admission marketing. My pitch to them: "stats nobody can inflate." Edtech SaaS, not a toy.
 
-This Level 1 counter is the seed: owner-bound increments become one-nullifier-one-count offer brackets, the 1-10 range proof becomes a CTC-threshold predicate, and `count` becomes per-bracket public totals.
+My first 50 users are one placed batch. Classmates with offers prove, juniors verify — phones in a classroom, gasless through DUST sponsorship so no tester ever sees a seed phrase or a gas fee. No venue deals. No door hardware. Just people who already care.
+
+Later, the same nullifier-bracket pattern stretches to internships, hackathon wins, any countable credential.
+
+And this Level 1 counter? It's the seed of all that. Owner-bound increments become one-nullifier-one-count offer brackets. The 1-10 range proof becomes a CTC-threshold predicate. `count` becomes per-bracket public totals. Small now, honest later.
 
 ---
 
@@ -212,4 +222,4 @@ Contract Address: 6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186f
 
 ## 📄 License
 
-MIT
+MIT — do what you want with it. If you fix my circuits, send a PR.
