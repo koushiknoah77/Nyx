@@ -19,13 +19,21 @@
 
 ---
 
+## 🎬 Live Demo
+[PASTE LIVE URL AFTER DEPLOYING FRONTEND]
+
+The live app talks to the Preprod contract below. You will need the Lace wallet
+on the Preprod network to click through it.
+
 ## 📍 Contract Address
 | Network | Address |
 |---------|------------------------------------------------------------------|
+| Preprod | fd737b5c0f40cdc6fd052a2fbf74fff3e8c24b0ffdf20f19ab6f9b6dcea6b2cc |
 | Preview | 6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1 |
 
-> Deployed to Preview on 2026-09-07 from wallet `mn_addr_preview1g9d...aphuue`
-> (full address lives in local `.midnight-state.json`, gitignored).
+> Preprod deployed on 2026-09-08 for the Level 2 frontend. Preview deployed on
+> 2026-09-07 for Level 1. Deployer wallets live in local `.midnight-state.json`
+> (gitignored).
 
 ---
 
@@ -109,6 +117,20 @@ cd Nyx
 npm install
 npm run compile   # compact compile contracts/counter.compact managed/counter
 ```
+
+## 🏃 Run Locally
+
+```bash
+git clone https://github.com/koushiknoah77/Nyx.git
+cd Nyx
+npm install
+npm run dev   # Vite at http://localhost:5173
+```
+
+Then install the Lace wallet extension, switch it to Preprod, open the app and
+connect. For local proving, point Lace at a local proof server (Lace Settings,
+Midnight section) with Docker running:
+`docker run -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v`.
 
 ## 🧪 Run Tests
 
