@@ -40,6 +40,8 @@
 
 No constructor args. Deploy runs the implicit constructor, then `init` is the first circuit call.
 
+Roadmap: L2/L3 evolves this contract toward offer-bracket counters with nullifier sets (see Initial Idea).
+
 ---
 
 ## 🔐 Privacy Model
@@ -156,19 +158,17 @@ npm test                # must print "Tests 5 passed (5)"
 
 ## 💡 Initial Idea
 
-**Problem:** campus venues get fined for underage entry, and students hate handing their ID to a stranger at the door. Existing checkers either stare at a birth date (slow, creepy) or store student IDs in a database (a breach waiting to happen).
+Campus placement stats are inflated — everyone knows it, nobody can prove it. OfferStats fixes that: placed seniors prove their offers count toward honest stats without anyone seeing their salary. An offer-letter commitment plus a nullifier means one offer = one count — no double-counting, no fake entries. The chain publishes only aggregates: median CTC, % placed, bracket counts. No names, no exact salaries.
 
-**Product:** Nyx is tap-to-prove event entry. A student proves "18+" (or "enrolled") in ~10 seconds without showing any ID. The organizer gets a compliance log with zero personal data stored.
+Why students will actually use it: seniors flex verified placements (status), juniors finally see true numbers instead of brochure fiction. Privacy is the engine, not the sales pitch.
 
-**Why students will actually use it:** skip the ID queue, never hand your license to a bouncer, access 18+ zones, plus perks (drink tokens, discounts). Privacy is the engine, not the sales pitch.
+Why colleges pay: credible placement data is their #1 admission marketing — edtech SaaS, not a toy. The pitch: "stats nobody can inflate."
 
-**Why organizers pay:** fine avoidance, faster entry, and no breach liability — "we can't leak what we don't hold." Per-event SaaS plus a verification API.
+Getting the first 50 users: one placed batch. Classmates with offers prove, juniors verify — phones in a classroom, gasless via DUST sponsorship so testers never touch crypto UX. No venue deals, no door hardware.
 
-**Getting the first 50 users:** distribution comes through organizers, not app-store downloads. 2-3 campus events mandate or fast-lane Nyx at entry; one 200-person fest converts 25% and L5's 50-tester requirement is done — doubling as our validation cohort. Gasless via DUST sponsorship so testers never touch crypto UX.
+Later: the same nullifier-bracket pattern extends to internships, hackathon wins, and any countable credential.
 
-**Later:** the same credential extends to exam halls, canteens, and club memberships.
-
-This Level 1 counter is the minimal version of that pattern: `count` and an owner commitment are public, while the secret and each increment (1-10) stay private as witnesses. `init` binds the counter to `ownerOf(secret)` and `increment` proves ownership plus range, disclosing only the new total.
+This Level 1 counter is the seed: owner-bound increments become one-nullifier-one-count offer brackets, the 1-10 range proof becomes a CTC-threshold predicate, and `count` becomes per-bracket public totals.
 
 ---
 
