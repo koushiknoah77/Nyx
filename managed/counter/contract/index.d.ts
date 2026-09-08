@@ -25,6 +25,7 @@ export type Circuits<PS> = {
 export type Ledger = {
   readonly count: bigint;
   readonly owner: Uint8Array;
+  readonly initialized: boolean;
 }
 
 export type ContractReferenceLocations = any;

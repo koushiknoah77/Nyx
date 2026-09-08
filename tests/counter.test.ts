@@ -77,6 +77,22 @@ describe('counter circuit logic', () => {
 });
 
 describe('counter state transitions', () => {
+  it('rejects a second init, even from the same secret', () => {
+    const { contract, currentContractState } = freshState();
+    const ctx = circuitCtx(contract, currentContractState, witnessesFor(SECRET_A));
+    const res = contract.impureCircuits.init(ctx);
+
+    // Re-running init must fail: otherwise anyone could rebind the owner
+    // and steal the counter (count stays 0 through init, so only the
+    // initialized flag can guard this).
+    const againCtx = circuitCtx(contract, stateOf(res as never), witnessesFor(SECRET_A));
+    expect(() => contract.impureCircuits.init(againCtx)).toThrow('already initialized');
+  });
+  it('rejects increments before init', () => {
+    const { contract, currentContractState } = freshState();
+    const ctx = circuitCtx(contract, currentContractState, witnessesFor(SECRET_A));
+    expect(() => contract.impureCircuits.increment(ctx)).toThrow('not initialized');
+  });
   it('increments the public total by the constant 1 and accumulates', () => {
     const { contract, currentContractState } = freshState();
     let ctx = circuitCtx(contract, currentContractState, witnessesFor(SECRET_A));

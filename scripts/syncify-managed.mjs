@@ -1,17 +1,18 @@
 /**
- * Post-process Compact 0.34.x generated output for the stable deploy stack.
+ * Guard for Compact generated output against the stable deploy stack.
  *
- * Background: compiler 0.34 emits `async` circuit entry points, but the
- * stable Midnight.js stack (midnight-js-contracts 4.1.1 / compact-js 2.5.1)
- * invokes `initialState` synchronously — destructuring the returned Promise
- * yields `undefined` everywhere and deploy dies in `decodeZswapLocalState`.
- * Every `await` in the generated file awaits a synchronous value (internal
- * circuit impls and sync witness callbacks), so removing `async` + those
- * `await`s is semantics-preserving. `await` on the results elsewhere
- * (tests, tsx) keeps working — awaiting a non-promise is legal.
+ * Background: newer compilers (0.34.x) emit `async` circuit entry points,
+ * but the stable Midnight.js stack (midnight-js-contracts 4.1.1 /
+ * compact-js 2.5.1) invokes `initialState` synchronously — destructuring the
+ * returned Promise yields `undefined` everywhere and deploy dies in
+ * `decodeZswapLocalState`. Our pinned compiler (0.31.1) emits synchronous
+ * entry points, so this script is currently a no-op guard ("nothing to
+ * change"). If a compiler upgrade reintroduces `async`, the rules below
+ * strip it (semantics-preserving: every awaited value is synchronous) and
+ * the script fails loudly if any `await` survives, so a shape change can't
+ * silently break deploys.
  *
- * Re-run automatically via `npm run compile`. Fails loudly if any `await`
- * survives, so a future compiler change can't silently break deploys.
+ * Re-run automatically via `npm run compile`.
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';

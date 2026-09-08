@@ -6,6 +6,9 @@ import CompactStandardLibrary;
 // PUBLIC (on-chain, visible to anyone):
 //   - `count`: the running counter total.
 //   - `owner`: a hash commitment identifying the current owner (not the secret).
+//   - `initialized`: one-time-setup flag. Prevents init from running twice
+//     (a `count == 0` guard alone would never trip, since init leaves count
+//     at 0 — anyone could re-run init and steal ownership).
 // PRIVATE (never leaves the user's machine, never rendered in the UI):
 //   - `userSecret()`: witness returning the owner's 32-byte secret.
 // PROVED without revealing:
@@ -22,6 +25,7 @@ import CompactStandardLibrary;
 
 export ledger count: Uint<64>;
 export ledger owner: Bytes<32>;
+export ledger initialized: Boolean;
 
 witness userSecret(): Bytes<32>;
 
@@ -33,15 +37,19 @@ circuit ownerOf(sk: Bytes<32>): Bytes<32> {
 }
 
 // One-time setup: bind the counter to the caller's secret commitment.
+// The flag (not count, which stays 0 through init) is what makes this
+// truly one-time — otherwise anyone could re-run init and take ownership.
 export circuit init(): [] {
-  assert(count == 0, "already initialized");
+  assert(!initialized, "already initialized");
   const sk = userSecret();
   owner = disclose(ownerOf(sk));
+  initialized = true;
 }
 
 // Owner-only increment: moves the public total by the constant 1. The proof
 // shows knowledge of the owner secret without revealing it.
 export circuit increment(): [] {
+  assert(initialized, "not initialized");
   const sk = userSecret();
   assert(owner == ownerOf(sk), "not owner");
   count = (count + 1) as Uint<64>;
