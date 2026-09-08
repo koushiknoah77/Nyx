@@ -9,7 +9,11 @@ import { dappConnectorProofProvider } from '@midnight-ntwrk/midnight-js-dapp-con
 import { findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
 import { CompiledContract } from '@midnight-ntwrk/midnight-js-protocol/compact-js';
 import * as ledger from '@midnight-ntwrk/midnight-js-protocol/ledger';
-import { ContractState, ledger as readLedger } from '@midnight-ntwrk/compact-runtime';
+import { ContractState } from '@midnight-ntwrk/compact-runtime';
+import {
+  Contract,
+  ledger as readLedger,
+} from '../../managed/counter/contract/index.js';
 import {
   FALLBACK_INDEXER,
   FALLBACK_INDEXER_WS,
@@ -35,14 +39,13 @@ let compiledCache: unknown = null;
  * Neither value is ever rendered in the UI. */
 export async function getCompiledContract(): Promise<never> {
   if (compiledCache) return compiledCache as never;
-  const mod = await import('../../managed/counter/contract/index.js');
   const witnesses = {
     userSecret: ({ privateState }: { privateState: unknown }) =>
       [privateState, getOwnerSecret()] as [unknown, Uint8Array],
     secretStep: ({ privateState }: { privateState: unknown }) =>
       [privateState, FIXED_STEP] as [unknown, bigint],
   };
-  compiledCache = CompiledContract.make('counter', mod.Contract).pipe(
+  compiledCache = CompiledContract.make('counter', Contract).pipe(
     CompiledContract.withWitnesses(witnesses as never),
     // Inert in the browser (the fetch provider below serves the artifacts);
     // kept so the CompiledContract type resolves fully.
@@ -157,7 +160,7 @@ export async function callCircuit(
     compiledContract: compiled,
     privateStateId: PRIVATE_STATE_ID,
     initialPrivateState: {},
-  } as never)) as {
+  } as never)) as unknown as {
     callTx: Record<'init' | 'increment', () => Promise<unknown>>;
   };
   return found.callTx[circuit]();
