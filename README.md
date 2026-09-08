@@ -16,10 +16,10 @@ This URL talks to the Preprod contract below. You need Lace wallet on Preprod to
 
 | Network | Address |
 |---------|------------------------------------------------------------------|
-| Preprod | 3cec0caf86e0daf71868051c301f9c7841586963c3063ba3b232835ef304ff4f |
+| Preprod | e15e39e7384dacd94089c6b5350094db636b3a238969d5da1793bfc445779890 |
 | Preview | 6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1 |
 
-Preprod was redeployed on 2026-09-08 for the final design (constant +1, no step disclosure). Preview was the Level 1 deploy on 2026-09-07. Deployer wallets live in local `.midnight-state.json`, gitignored, never committed.
+Preprod was redeployed on 2026-09-08 for the init-guard fix (`initialized` flag — second `init` calls now fail instead of rebinding ownership). Preview still runs the previous build (redeploy blocked by a wallet-SDK shielded-sync failure on Preview; the old Preview address verifies fine against the old code). Deployer wallets live in local `.midnight-state.json`, gitignored, never committed.
 
 ## What This Does
 
@@ -46,6 +46,7 @@ The frontend in `src/` is a React + Vite dApp. Connect Lace on Preprod, it reads
   - `count` — the running total. That's the point, the world gets the number.
   - The increment — it's the constant `1`. There is no step input, nothing to hide there. Each call moves the total by exactly one.
   - `owner` — a hash commitment, `persistentHash("campus-counter:owner:v1" || secret)`. Proves *someone* owns it without saying who.
+  - `initialized` — one-time-setup flag. Public, boring, and load-bearing: it's what stops a second `init` from rebinding ownership.
 - What is PRIVATE (never on-chain, never in the UI):
   - `userSecret()` — the owner's 32-byte secret. Generated in your browser, stored in localStorage, never rendered anywhere.
   - Who called — ownership is a ZK check, not a wallet-address check. The proof doesn't name the caller.
@@ -120,10 +121,10 @@ Then: install Lace, switch it to Preprod, open the app, hit Connect. If proving 
 ## Run Tests
 
 ```bash
-npm test   # vitest run — 4 tests
+npm test   # vitest run — 6 tests
 ```
 
-What they cover: init binds the owner commitment deterministically, increments accumulate (3 calls → 3), a wrong secret gets rejected with `not owner`, and raw secret bytes never show up in public state. If any of that breaks, nothing built on top matters.
+What they cover: init binds the owner commitment deterministically, a second init fails with `already initialized` (no ownership hijack), increments before init fail with `not initialized`, increments accumulate (3 calls → 3), a wrong secret gets rejected with `not owner`, and raw secret bytes never show up in public state. If any of that breaks, nothing built on top matters.
 
 ## Deploy
 
@@ -152,7 +153,7 @@ index.html                  # Vite entry
 vite.config.ts              # WASM + node-polyfill browser config
 vercel.json                 # SPA rewrites for hosting
 public/zk/counter/          # ZK artifacts served to the browser (keys/, zkir/)
-tests/counter.test.ts       # 4 vitest tests
+tests/counter.test.ts       # 6 vitest tests
 docs/l4-idea.md             # L4 idea submission overview
 docs/l2-demo.md             # demo video script (four required shots)
 docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.txt)
@@ -163,11 +164,11 @@ docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.
 ```bash
 npx tsc --noEmit      # must be clean
 npm run compile       # must print "Compiling 2 circuits"
-npm test              # must print "Tests 4 passed (4)"
+npm test              # must print "Tests 6 passed (6)"
 npm run build         # typecheck + Vite bundle into dist/
 ```
 
-Last verified on my machine: tsc clean, 2 circuits, 4/4 tests, 1430 modules built in ~28s. The 500 kB+ chunk warning is normal — ledger WASM is just big.
+Last verified on my machine: tsc clean, 2 circuits, 6/6 tests, 1430 modules built in ~24s. The 500 kB+ chunk warning is normal — ledger WASM is just big.
 
 ## Roadmap
 
@@ -229,17 +230,17 @@ Compiling 2 circuits:
 syncify-managed: nothing to change
 ```
 
-### Tests — 4 passing (`docs/screenshots/tests.txt`)
+### Tests — 6 passing (`docs/screenshots/tests.txt`)
 ```text
- ✓ tests/counter.test.ts (4 tests)
+ ✓ tests/counter.test.ts (6 tests)
 
  Test Files  1 passed (1)
-      Tests  4 passed (4)
+      Tests  6 passed (6)
 ```
 
 ### Deploy — Preprod contract address (`docs/screenshots/deploy.txt`)
 ```text
-Contract Address: 3cec0caf86e0daf71868051c301f9c7841586963c3063ba3b232835ef304ff4f
+Contract Address: e15e39e7384dacd94089c6b5350094db636b3a238969d5da1793bfc445779890
 ```
 
 ### Frontend build (`docs/screenshots/frontend-build.txt`)

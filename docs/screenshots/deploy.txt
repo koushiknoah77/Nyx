@@ -1,5 +1,5 @@
   ✅ Contract deployed successfully!
 
-  Contract Address: 3cec0caf86e0daf71868051c301f9c7841586963c3063ba3b232835ef304ff4f
+  Contract Address: e15e39e7384dacd94089c6b5350094db636b3a238969d5da1793bfc445779890
 
   Saved to .midnight-state.json

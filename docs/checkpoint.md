@@ -8,8 +8,8 @@ stats via threshold proofs + nullifiers). Founder README in `README.md`,
 L4 submission in `docs/l4-idea.md`, L2 demo script in `docs/l2-demo.md`.
 
 ## Deployments (public info)
-- Preview (L1): `6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1`
-- Preprod (L2): `3cec0caf86e0daf71868051c301f9c7841586963c3063ba3b232835ef304ff4f` (redeployed for constant-1 increment)
+- Preview (L1): `6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1` (previous build; redeploy blocked — wallet-sdk 1.2.0 shielded sync crashes on Preview, see below)
+- Preprod (L2): `e15e39e7384dacd94089c6b5350094db636b3a238969d5da1793bfc445779890` (redeployed 2026-09-08 for the init-guard fix)
 - Records live in local `.midnight-state.json` (gitignored, never commit).
 - Wallet seeds live ONLY in `../mn-demo/.midnight-state.json` + env vars (never in repo).
 
@@ -33,10 +33,23 @@ L4 submission in `docs/l4-idea.md`, L2 demo script in `docs/l2-demo.md`.
   preprod `midnight-tmnight-preprod.nethermind.dev`.
 
 ## Done
-- L1: compile, 4/4 tests (constant-1 design), Preview deploy, README, 5+ commits, submitted shape.
-- L2 code: Preprod deploy, full frontend (connect/disconnect + errors,
-  init/increment calls, local proving, hidden witnesses, exact UI label),
-  `tsc` + `vite build` green, L1 tests still 4/4 (constant-1 design), 9 L2 commits, README sections.
+- L1: compile, Preview deploy (previous build), README, 5+ commits, submitted shape.
+- Contract audit fix: `init` used a `count == 0` guard that never trips (init
+  leaves count at 0) — anyone could re-run init and steal ownership. Fixed
+  with an `initialized` ledger flag; 2 new tests (double-init rejects,
+  pre-init increment rejects). Suite now 6/6.
+- L2 code: Preprod redeploy of the fixed build, full frontend
+  (connect/disconnect + errors, init/increment calls, local proving, hidden
+  witnesses, exact UI label, real `initialized` flag read),
+  `tsc` + `vite build` green, README sections.
+- Frontend hardening: secret storage survives blocked/corrupt localStorage
+  (session fallback + hex validation), wallet-name guard, malformed-tx guard.
+- Known issue: Preview redeploy blocked — wallet-sdk 1.2.0 shielded sync
+  throws `pendingOutputs.values.map is not a function` against Preview
+  (Node 22 confirmed, good seed confirmed, virgin + restored state both fail;
+  Preprod syncs clean). Likely Preview-side data tripping an SDK replay path.
+  Workaround when needed: fresh Preview wallet + faucet funds (virgin shielded
+  state has no history to replay).
 
 ## Still manual (needs human)
 1. `npm i -g vercel; vercel login; vercel --prod` → paste URL into README Live Demo.
