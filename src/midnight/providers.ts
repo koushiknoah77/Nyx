@@ -22,12 +22,12 @@ import {
   PRIVATE_STATE_ID,
   ZK_BASE_PATH,
 } from '../config';
-import { fromHex, getOwnerSecret, isZeroBytes, toHex } from './wallet';
+import { fromHex, getOwnerSecret, toHex } from './wallet';
 
 export interface CounterView {
   count: bigint;
   owner: Uint8Array;
-  /** False until init() binds an owner commitment. */
+  /** On-chain one-time-setup flag. False until init() binds an owner commitment. */
   initialized: boolean;
 }
 
@@ -96,11 +96,13 @@ export async function buildProviders(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     balanceTx: async (tx: any) => {
       const { tx: balancedHex } = await api.balanceUnsealedTransaction(toHex(tx.serialize()));
+      const balancedBytes = fromHex(balancedHex);
+      if (!balancedBytes) throw new Error('Wallet returned malformed transaction bytes.');
       return ledger.Transaction.deserialize(
         'signature',
         'proof',
         'pre-binding',
-        fromHex(balancedHex),
+        balancedBytes,
       );
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,7 +143,9 @@ export async function readCounterState(
     // ledger-8 binary format, so deserialize-then-read is safe.
     const compact = ContractState.deserialize(onchain.serialize());
     const view = readLedger(compact.data);
-    return { count: view.count, owner: view.owner, initialized: !isZeroBytes(view.owner) };
+    // Trust the contract's own one-time-setup flag, not a zero-owner
+    // heuristic — the flag is what init() actually guards on.
+    return { count: view.count, owner: view.owner, initialized: view.initialized };
   } catch {
     return null;
   }

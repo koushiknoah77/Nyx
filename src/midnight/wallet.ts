@@ -16,7 +16,7 @@ export function selectWallet(): InitialAPI {
   if (wallets.length === 0) {
     throw new Error('No Midnight wallet found. Install the Lace wallet extension first.');
   }
-  return wallets.find((w) => w.name.toLowerCase().includes('lace')) ?? wallets[0];
+  return wallets.find((w) => (w.name ?? '').toLowerCase().includes('lace')) ?? wallets[0];
 }
 
 export function toHex(bytes: Uint8Array): string {
@@ -25,14 +25,22 @@ export function toHex(bytes: Uint8Array): string {
     .join('');
 }
 
-export function fromHex(hex: string): Uint8Array {
+export function fromHex(hex: string): Uint8Array | null {
   const clean = hex.startsWith('0x') ? hex.slice(2) : hex;
-  const out = new Uint8Array(clean.length / 2);
+  // Reject corrupt entries (odd length, non-hex, wrong size) instead of
+  // silently deriving a garbage secret from them.
+  if (!/^(?:[0-9a-fA-F]{2}){32}$/.test(clean)) return null;
+  const out = new Uint8Array(32);
   for (let i = 0; i < out.length; i++) {
     out[i] = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
   }
   return out;
 }
+
+// Session-only fallback when localStorage is unreadable (blocked cookies,
+// private browsing). Lost on reload — meaning a re-init in a new session
+// fails with 'not owner' instead of silently using a different identity.
+let memorySecret: Uint8Array | null = null;
 
 /**
  * The owner's 32-byte secret. Generated once per browser and persisted to
@@ -40,15 +48,25 @@ export function fromHex(hex: string): Uint8Array {
  * into circuit witnesses.
  */
 export function getOwnerSecret(): Uint8Array {
-  const stored = localStorage.getItem(SECRET_STORAGE_KEY);
-  if (stored) return fromHex(stored);
-  const fresh = crypto.getRandomValues(new Uint8Array(32));
   try {
-    localStorage.setItem(SECRET_STORAGE_KEY, toHex(fresh));
+    const stored = localStorage.getItem(SECRET_STORAGE_KEY);
+    if (stored) {
+      const parsed = fromHex(stored);
+      if (parsed) return parsed;
+      // Corrupt entry: fall through and generate a fresh secret.
+    }
+    const fresh = crypto.getRandomValues(new Uint8Array(32));
+    try {
+      localStorage.setItem(SECRET_STORAGE_KEY, toHex(fresh));
+    } catch {
+      memorySecret = fresh;
+    }
+    return fresh;
   } catch {
-    // Private browsing: keep it in memory for this session only.
+    // localStorage itself threw (blocked storage): session-only secret.
+    if (!memorySecret) memorySecret = crypto.getRandomValues(new Uint8Array(32));
+    return memorySecret;
   }
-  return fresh;
 }
 
 export function isZeroBytes(v: Uint8Array): boolean {

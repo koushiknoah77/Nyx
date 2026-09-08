@@ -1,9 +1,10 @@
 // Single source of truth for the Preprod deployment the UI talks to.
 // L1 deployed Preview (6880d0b1...); L2 targets Preprod per the challenge spec.
+// Preprod redeployed 2026-09-08 for the init-guard fix (initialized flag).
 export const NETWORK_ID = 'preprod' as const;
 
 export const PREPROD_CONTRACT_ADDRESS =
-  '3cec0caf86e0daf71868051c301f9c7841586963c3063ba3b232835ef304ff4f';
+  'e15e39e7384dacd94089c6b5350094db636b3a238969d5da1793bfc445779890';
 
 // Fallbacks only: after connecting we prefer the wallet's own service config
 // (getConfiguration), since the user may point Lace at custom infrastructure.
