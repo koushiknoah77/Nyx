@@ -1,0 +1,97 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b0b14;
+  --card: #151528;
+  --ink: #eceaf4;
+  --muted: #9a94b5;
+  --accent: #8b5cf6;
+  --ok: #22c55e;
+  --bad: #ef4444;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+header h1 { margin: 0; font-size: 2.2rem; }
+.tag { color: var(--muted); margin-top: 0.25rem; }
+
+.card {
+  background: var(--card);
+  border: 1px solid #2b2b4d;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+h2 { margin: 0; font-size: 1.1rem; }
+
+.pill {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid #3b3b63;
+  color: var(--muted);
+}
+.pill.on { color: var(--ok); border-color: var(--ok); }
+.pill.off { color: var(--muted); }
+.pill.pre { color: var(--accent); border-color: var(--accent); }
+
+button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-top: 0.75rem;
+  margin-right: 0.5rem;
+}
+button:disabled { opacity: 0.55; cursor: wait; }
+button.ghost { background: transparent; border: 1px solid #3b3b63; }
+
+.label { color: var(--muted); font-size: 0.8rem; margin: 0.75rem 0 0.15rem; }
+.addr { overflow-wrap: anywhere; font-family: ui-monospace, monospace; font-size: 0.85rem; }
+.addr.small { font-size: 0.75rem; }
+.muted { color: var(--muted); }
+.tiny { font-size: 0.78rem; }
+
+.countbox { display: flex; align-items: baseline; gap: 0.75rem; margin: 0.5rem 0; }
+.count { font-size: 2.4rem; font-weight: 700; }
+
+.error {
+  border: 1px solid var(--bad);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+}
+.ok { color: var(--ok); font-size: 0.85rem; overflow-wrap: anywhere; }
+
+.prove {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--ok);
+  border-top: 1px solid #2b2b4d;
+  padding-top: 0.75rem;
+}
+
+footer { margin-top: 2rem; text-align: center; }
