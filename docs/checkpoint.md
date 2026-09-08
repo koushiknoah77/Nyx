@@ -36,7 +36,7 @@ L4 submission in `docs/l4-idea.md`, L2 demo script in `docs/l2-demo.md`.
 - L1: compile, 4/4 tests (constant-1 design), Preview deploy, README, 5+ commits, submitted shape.
 - L2 code: Preprod deploy, full frontend (connect/disconnect + errors,
   init/increment calls, local proving, hidden witnesses, exact UI label),
-  `tsc` + `vite build` green, L1 tests still 5/5, 9 L2 commits, README sections.
+  `tsc` + `vite build` green, L1 tests still 4/4 (constant-1 design), 9 L2 commits, README sections.
 
 ## Still manual (needs human)
 1. `npm i -g vercel; vercel login; vercel --prod` → paste URL into README Live Demo.
