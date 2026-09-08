@@ -266,6 +266,14 @@ syncify-managed: nothing to change
 Contract Address: 6880d0b105b2f9610c14c73f9a68e240f08382a9feccdfd26fb23a99da186fa1
 ```
 
+### Frontend build (`docs/screenshots/frontend-build.txt`)
+```text
+1430 modules transformed.
+dist/assets/midnight_ledger_wasm_bg-*.wasm   10,143.78 kB
+dist/assets/index-*.js                        1,113.33 kB
+built in ~30s
+```
+
 ---
 
 ## 🔗 Links
