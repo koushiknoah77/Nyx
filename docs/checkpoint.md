@@ -59,7 +59,11 @@ L4 submission in `docs/l4-idea.md`, L2 demo script in `docs/l2-demo.md`.
 
 ## Still manual (needs human)
 1. `npm i -g vercel; vercel login; vercel --prod` → paste URL into README Live Demo.
-2. Record demo video per `docs/l2-demo.md` → paste link into README Demo Video.
+   Pre-verified locally 2026-09-09: tsc clean, 14/14 tests, public-counter (no-wallet
+   view) + favicon/OG + SDK note + deploy checklist all committed, `npm run build`
+   pending final run. Incognito check after deploy: public total must render with no wallet.
+2. Record demo video per `docs/l2-demo.md` (now opens on the disconnected public
+   total) → paste link into README Demo Video. Capture 4 UI PNGs per `docs/DEPLOY-CHECKLIST.md`.
 3. Submit repo + live link on Rise In (L2 prize: 60 x $10).
 4. Lace wallet on Preprod + local proof server selected, for demo + testing.
 

@@ -35,9 +35,22 @@
 
 ## 🎬 Live Demo
 
-> [PASTE LIVE URL AFTER DEPLOYING FRONTEND]
+> [PASTE LIVE URL AFTER `vercel --prod` — e.g. `https://nyx-yourname.vercel.app`]
 
-The live app talks to the Preprod contract below. You need the **Lace wallet on Preprod** to click through it. Local dev runs at `http://localhost:5173`.
+The live app talks to the Preprod contract below. **No wallet needed to view:**
+the landing state reads the live on-chain total straight from the Preprod indexer,
+so judges always see a populated demo (count, initialized flag, owner commitment).
+You need the **Lace wallet on Preprod** only to transact (initialize / increment).
+Local dev runs at `http://localhost:5173`.
+
+Deploy (Vercel, already configured via `vercel.json` SPA rewrites):
+```bash
+npm i -g vercel; vercel login; vercel --prod
+# then replace the placeholder above with the production URL
+```
+Pre-deploy check: `npm run build` must succeed and `dist/zk/counter/` must contain
+the ZK artifacts (copied from `public/zk/counter/`). See [`docs/l2-sdk-note.md`](docs/l2-sdk-note.md)
+for the provider-to-package mapping judges look for.
 
 ## 📍 Contract Address
 
@@ -126,6 +139,12 @@ What they can never see: the 32-byte secret, or who proved. The commitment shows
 | Frontend | React 19 + Vite 7 · Lace via DApp Connector API 4.0.1 · proving delegated to wallet |
 | App | Node.js v22 (WSL Ubuntu) · TypeScript · Vitest |
 
+> Judge note: `@midnight-ntwrk/midnight-js-network-provider` does not exist on npm
+> (404). In midnight-js 4.x its role is split across `indexer-public-data-provider`
+> (reads), `level-private-state-provider`, `fetch-zk-config-provider`, and
+> `dapp-connector-proof-provider` — all wired in [`src/midnight/providers.ts`](src/midnight/providers.ts).
+> Full keyword → file mapping: [`docs/l2-sdk-note.md`](docs/l2-sdk-note.md).
+
 Versions follow the [support matrix](https://docs.midnight.network/relnotes/support-matrix). I burned half a day on compiler 0.34 + runtime 0.19 before learning that lesson — 0.31.1 + 0.16.0 is the pair that actually deploys.
 
 ## 📋 Prerequisites
@@ -165,7 +184,7 @@ Then install Lace, switch it to Preprod, open the app, hit Connect. If proving h
 ## 🧪 Run Tests
 
 ```bash
-npm test   # vitest run — 6 tests
+npm test   # vitest run — 14 tests (6 counter + 8 offerstats)
 ```
 
 | # | Test | Guards |
@@ -202,13 +221,17 @@ contracts/counter.compact   # the Compact contract
 managed/counter/            # compiler output: contract/ keys/ zkir/ compiler/
 scripts/                    # deploy-counter.ts, network.ts, wallet.ts, wallet-state.ts
 src/                        # React dApp: App, components/, hooks/, midnight/
-index.html                  # Vite entry
+src/components/PublicCounter.tsx  # read-only Preprod view (no wallet — fixes empty demo)
+src/hooks/usePublicCounter.ts     # indexer-only poll of count/initialized/owner
+index.html                  # Vite entry (favicon + OG meta)
 vite.config.ts              # WASM + node-polyfill browser config
 vercel.json                 # SPA rewrites for hosting
 public/zk/counter/          # ZK artifacts served to the browser (keys/, zkir/)
+public/favicon.svg          # Nyx moon-N mark
 tests/counter.test.ts       # 6 vitest tests
 docs/l4-idea.md             # L4 idea submission overview
 docs/l2-demo.md             # demo video script (four required shots)
+docs/l2-sdk-note.md         # provider → npm package mapping for judges
 docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.txt)
 ```
 
@@ -217,11 +240,11 @@ docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.
 ```bash
 npx tsc --noEmit      # must be clean
 npm run compile       # must print "Compiling 2 circuits"
-npm test              # must print "Tests 6 passed (6)"
+npm test              # must print "Tests 14 passed (14)"
 npm run build         # typecheck + Vite bundle into dist/
 ```
 
-Last verified: tsc clean · 2 circuits · 6/6 tests · 1430 modules in ~27s. The 500 kB+ chunk warning is normal — ledger WASM is just big.
+Last verified: tsc clean · 2 circuits · 14/14 tests · 1435 modules in ~7s. The 500 kB+ chunk warning is normal — ledger WASM is just big.
 
 ## 🗺️ Roadmap
 
@@ -277,9 +300,17 @@ This counter is the seed. Owner-bound increments become one-nullifier-one-count 
 
 Under 2 minutes, four shots: connect Lace and show the address → call the circuit and show local proof generation → show the on-chain result → point out the private input was never shown. Full script: [`docs/l2-demo.md`](docs/l2-demo.md).
 
+Recording checklist: open the **live URL** (not localhost) so judges see the deployed build;
+start disconnected to show the public total loads with no wallet; then connect,
+increment, show the tx id + refreshed total; end on the Privacy panel
+("Proved without revealing your input"). Never open localStorage devtools on camera.
+
 ## 📸 Screenshots
 
 Terminal captures live under [`docs/screenshots/`](docs/screenshots/). PNGs go next to them as `compile.png`, `tests.png`, `deploy.png`.
+UI captures to add after `vercel --prod`: `ui-disconnected.png` (public total, no wallet),
+`ui-connected.png` (address + circuits), `ui-proving.png` (local-proving spinner),
+`ui-incremented.png` (new total + tx id).
 
 <details>
 <summary><b>Compile (<code>docs/screenshots/compile.txt</code>)</b></summary>

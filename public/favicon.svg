@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#05060f"/>
+  <circle cx="44" cy="20" r="10" fill="#8b5cf6" opacity="0.9"/>
+  <circle cx="40" cy="17" r="8" fill="#05060f"/>
+  <text x="32" y="46" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#f1eefb" text-anchor="middle">N</text>
+  <circle cx="20" cy="14" r="1.2" fill="#ffffff"/>
+  <circle cx="28" cy="10" r="1" fill="#cfd8ff"/>
+  <circle cx="14" cy="26" r="1" fill="#ffffff"/>
+</svg>

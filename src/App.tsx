@@ -1,14 +1,17 @@
 import { useCallback, useState } from 'react';
 import { WalletConnect } from './components/WalletConnect';
 import { CircuitCall } from './components/CircuitCall';
+import { PublicCounter } from './components/PublicCounter';
 import { Steps } from './components/Steps';
 import { CopyButton } from './components/CopyButton';
 import { useMidnight } from './hooks/useMidnight';
+import { usePublicCounter } from './hooks/usePublicCounter';
 import { EXPLORER_URL, PREPROD_CONTRACT_ADDRESS } from './config';
 import './index.css';
 
 export default function App() {
   const { status, connect, disconnect, clearError } = useMidnight();
+  const publicState = usePublicCounter();
   const [initialized, setInitialized] = useState<boolean | null>(null);
   const connected = status.kind === 'connected';
 
@@ -43,7 +46,23 @@ export default function App() {
       </header>
 
       <main>
-        <Steps connected={connected} initialized={connected ? initialized : null} />
+        {/* Journey follows the wallet's on-chain view once connected,
+            otherwise the public read-only state — never blank. */}
+        <Steps
+          connected={connected}
+          initialized={connected ? initialized : (publicState.view?.initialized ?? null)}
+        />
+
+        {/* Live Preprod total is always visible, even with no wallet.
+            This is the fix for the "empty demo" judge feedback. */}
+        {!connected && (
+          <PublicCounter
+            view={publicState.view}
+            loading={publicState.loading}
+            error={publicState.error}
+            onRefresh={publicState.refresh}
+          />
+        )}
 
         <WalletConnect
           status={status}
@@ -59,10 +78,12 @@ export default function App() {
             onViewChange={setInitialized}
           />
         ) : (
-          <section className="card">
-            <p className="muted" style={{ margin: 0 }}>
-              Connect Lace to call the counter circuits — initialize once, then increment
-              forever.
+          <section className="card" aria-label="How to transact">
+            <h2>Transact</h2>
+            <p className="muted" style={{ marginBottom: 0 }}>
+              Viewing is public — the live total above needs no wallet. To move it,
+              connect Lace (Preprod): initialize once to bind this browser as owner,
+              then increment +1 with a local zero-knowledge proof.
             </p>
           </section>
         )}

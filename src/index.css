@@ -352,6 +352,15 @@ button.small { padding: 0.45rem 0.8rem; font-size: 0.82rem; margin-top: 0; margi
   border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
+.countbox.skeleton {
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
 .count {
   font-family: var(--display);
   font-size: 3rem;

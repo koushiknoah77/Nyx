@@ -6,12 +6,16 @@ Target: prove the four Step 7 shots. Total budget ~110 seconds.
 - Lace wallet installed, switched to Preprod, funded with tNIGHT + DUST.
 - Local proof server running (Lace Settings, Midnight section, Local):
   `docker run -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v`
-- App open (live URL or `npm run dev` at http://localhost:5173).
+- App open on the **live Vercel URL** (not localhost) — in a fresh profile or
+  logged-out state first, so shot 0 shows the public total with no wallet.
 - Counter already initialized once (so the recording shows an increment).
   If not: click "Initialize" first, wait, refresh.
 
 ## Shots
-1. (0:00-0:25) Connect Lace wallet. Show the address appearing on screen.
+0. (0:00-0:15) Disconnected landing. Show the live public total, contract address,
+   and Privacy panel loading with NO wallet connected. Say: "No wallet — the
+   total is public, the secret never is."
+1. (0:15-0:35) Connect Lace wallet. Show the address appearing on screen.
    Say: "Connected through Lace on Preprod."
 2. (0:25-1:00) Click "Increment +1". Show the
    "Generating proof locally..." loading state. Say: "The proof is being
