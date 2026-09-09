@@ -325,7 +325,7 @@ This counter is the seed. Owner-bound increments become one-nullifier-one-count 
 
 > [PLACEHOLDER — link after recording]
 
-Under 2 minutes, four shots: connect Lace and show the address → call the circuit and show local proof generation → show the on-chain result → point out the private input was never shown. Full script: [`docs/l2-demo.md`](docs/l2-demo.md).
+Under 2 minutes, four shots: connect Lace and show the address → call the circuit and show local proof generation → show the on-chain result → point out the private input was never shown. Full script: [`docs/l2-demo.md`](docs/l2-demo.md). L3 needs a separate 1-minute cut (dApp flow + tests + CI badge): [`docs/l3-demo.md`](docs/l3-demo.md).
 
 Recording checklist: open the **live URL** (not localhost) so judges see the deployed build;
 start disconnected to show the public total loads with no wallet; then connect,
