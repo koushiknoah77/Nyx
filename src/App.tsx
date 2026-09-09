@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Navbar, type SiteView } from './components/site/Navbar';
 import { Footer } from './components/site/Footer';
 import { HomePage } from './components/site/HomePage';
@@ -14,11 +14,19 @@ import { usePublicCounter } from './hooks/usePublicCounter';
 import { useOfferStatsPublic } from './hooks/useOfferStatsPublic';
 import './index.css';
 
+const VIEWS: SiteView[] = ['home', 'about', 'how', 'students', 'colleges', 'stats', 'join', 'counter'];
+
+/** Deep-linkable views: #/stats opens the board, etc. Also powers screenshots. */
+function viewFromHash(): SiteView {
+  const h = window.location.hash.replace(/^#\/?/, '').split('?')[0];
+  return (VIEWS as string[]).includes(h) ? (h as SiteView) : 'home';
+}
+
 export default function App() {
   const { status, connect, disconnect, clearError } = useMidnight();
   const publicState = usePublicCounter();
   const offerStats = useOfferStatsPublic();
-  const [view, setView] = useState<SiteView>('home');
+  const [view, setView] = useState<SiteView>(() => viewFromHash());
   const [initialized, setInitialized] = useState<boolean | null>(null);
   const connected = status.kind === 'connected';
 
@@ -29,7 +37,17 @@ export default function App() {
 
   const go = useCallback((v: SiteView) => {
     setView(v);
+    window.location.hash = `#/${v}`;
     window.scrollTo({ top: 0 });
+  }, []);
+
+  useEffect(() => {
+    const onHash = () => {
+      setView(viewFromHash());
+      window.scrollTo({ top: 0 });
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
   return (

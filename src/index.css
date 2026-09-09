@@ -37,6 +37,7 @@ body {
   font-family: var(--sans);
   background: var(--bg);
   min-height: 100vh;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -107,6 +108,7 @@ button.brand {
   gap: 0.15rem;
   margin-left: 1rem;
   flex: 1;
+  min-width: 0;
   overflow-x: auto;
 }
 
@@ -250,7 +252,7 @@ button.small { padding: 0.5rem 1rem; font-size: 0.82rem; margin-top: 0; margin-r
 .card h2 { margin: 0; font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; }
 .card h3 { margin: 0 0 0.4rem; font-size: 1rem; font-weight: 700; }
 
-.row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
 
 .section { margin-top: 3rem; }
 .section-center { text-align: center; }
@@ -342,21 +344,22 @@ ol.how { list-style: none; }
 
 .phone-badge {
   position: absolute;
+  z-index: 2;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 14px;
   box-shadow: var(--shadow-sm);
-  padding: 0.65rem 0.8rem;
+  padding: 0.6rem 0.7rem;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  font-size: 0.74rem;
-  max-width: 13rem;
+  gap: 0.55rem;
+  font-size: 0.72rem;
+  max-width: 11.5rem;
   animation: float 4s ease-in-out infinite;
 }
 
-.phone-badge.b1 { top: 22%; left: -4.5rem; }
-.phone-badge.b2 { bottom: 18%; right: -4rem; animation-delay: 2s; }
+.phone-badge.b1 { top: 14%; left: -5rem; }
+.phone-badge.b2 { bottom: 10%; right: -4.6rem; animation-delay: 2s; }
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
@@ -533,7 +536,7 @@ button.toggle-opt.active { background: #fff; color: var(--ink); box-shadow: var(
 .activity time { color: var(--faint); font-family: var(--mono); font-size: 0.68rem; white-space: nowrap; }
 
 /* ── Counter playground (dev) ───────────────────────────── */
-.countbox { display: flex; align-items: baseline; gap: 0.9rem; margin: 0.9rem 0 0.2rem; padding: 1rem 0; border-top: 2px solid var(--ink); }
+.countbox { display: flex; align-items: baseline; gap: 0.9rem; margin: 0.9rem 0 0.2rem; padding: 1rem 0; border-top: 1px solid var(--line-strong); }
 .count { font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; animation: pop 0.3s ease-out; }
 @keyframes pop { 0% { opacity: 0.3; } 100% { opacity: 1; } }
 .countbox.skeleton { animation: skeleton-pulse 1.4s ease-in-out infinite; }
@@ -583,7 +586,7 @@ footer.site { margin-top: 4rem; border-top: 1px solid var(--line); padding: 2.5r
 .footer-col h4 { margin: 0 0 0.7rem; font-size: 0.78rem; font-weight: 800; }
 .footer-col button { display: block; margin: 0 0 0.45rem; padding: 0; background: none; border: none; box-shadow: none; color: var(--muted); font-size: 0.82rem; font-weight: 500; cursor: pointer; text-align: left; }
 .footer-col button:hover:not(:disabled) { color: var(--ink); transform: none; background: none; }
-.footer-base { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 1rem; font-size: 0.74rem; color: var(--faint); }
+.footer-base { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 1rem; font-size: 0.74rem; color: var(--faint); }
 button.linklike { background: none; border: none; box-shadow: none; color: var(--faint); font-size: 0.74rem; font-weight: 500; margin: 0; padding: 0; cursor: pointer; }
 button.linklike:hover:not(:disabled) { color: var(--ink); transform: none; background: none; }
 

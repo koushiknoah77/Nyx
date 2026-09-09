@@ -60,7 +60,12 @@ export function PublicCounter({ view, loading, error, onRefresh }: Props) {
       </div>
 
       <p className="muted tiny" style={{ marginTop: '0.7rem' }}>
-        Owner commitment (public): {view ? `${toHex(view.owner).slice(0, 24)}…` : '—'}
+        Owner commitment (public):{' '}
+        {view
+          ? view.owner.some((b) => b !== 0)
+            ? `${toHex(view.owner).slice(0, 24)}…`
+            : 'not bound yet — no owner has initialized'
+          : '—'}
         {' · '}Connect Lace below to initialize or increment.
       </p>
 
