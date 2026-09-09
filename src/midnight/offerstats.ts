@@ -23,21 +23,26 @@ import { networkReadProvider } from './network-provider';
 import { fromHex, toHex } from './wallet';
 
 // ─── Brackets (must match contracts/offerstats.compact) ─────────────────────
-//   0: < 500,000 | 1: 500,000–999,999 | 2: 1,000,000–1,999,999 | 3: >= 2,000,000
+//   0: < 600,000 | 1: 600,000–999,999 | 2: 1,000,000–1,499,999
+//   3: 1,500,000–1,999,999 | 4: >= 2,000,000
 
 export const BRACKET_META = [
-  { label: 'Under ₹5L', short: '<5L', min: 0n, max: 499_999n },
-  { label: '₹5L – ₹10L', short: '5–10L', min: 500_000n, max: 999_999n },
-  { label: '₹10L – ₹20L', short: '10–20L', min: 1_000_000n, max: 1_999_999n },
+  { label: 'Under ₹6L', short: '<6L', min: 0n, max: 599_999n },
+  { label: '₹6L – ₹10L', short: '6–10L', min: 600_000n, max: 999_999n },
+  { label: '₹10L – ₹15L', short: '10–15L', min: 1_000_000n, max: 1_499_999n },
+  { label: '₹15L – ₹20L', short: '15–20L', min: 1_500_000n, max: 1_999_999n },
   { label: '₹20L and above', short: '20L+', min: 2_000_000n, max: null },
 ] as const;
 
-/** Client-side bracket derivation. Boundary-exact: 500,000 → 1, 2,000,000 → 3. */
-export function bracketForSalary(salary: bigint): 0 | 1 | 2 | 3 {
-  if (salary < 500_000n) return 0;
+export type BracketIndex = 0 | 1 | 2 | 3 | 4;
+
+/** Client-side bracket derivation. Boundary-exact: 600,000 → 1, 2,000,000 → 4. */
+export function bracketForSalary(salary: bigint): BracketIndex {
+  if (salary < 600_000n) return 0;
   if (salary < 1_000_000n) return 1;
-  if (salary < 2_000_000n) return 2;
-  return 3;
+  if (salary < 1_500_000n) return 2;
+  if (salary < 2_000_000n) return 3;
+  return 4;
 }
 
 /** "% placed" from public aggregates only. Null when batch size is unknown/zero. */
@@ -48,16 +53,16 @@ export function percentPlaced(total: bigint, batchSize: bigint): string | null {
 }
 
 /** Which bracket holds the median offer (off-chain derivation, public inputs only). */
-export function medianBracket(counts: [bigint, bigint, bigint, bigint]): number | null {
+export function medianBracket(counts: [bigint, bigint, bigint, bigint, bigint]): number | null {
   const total = counts.reduce((a, b) => a + b, 0n);
   if (total === 0n) return null;
   const rank = total / 2n; // lower-median rank
   let acc = 0n;
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 5; i++) {
     acc += counts[i];
     if (rank < acc) return i;
   }
-  return 3;
+  return 4;
 }
 
 /** Indian digit grouping: 750000 → "7,50,000". Pure display helper. */
@@ -131,7 +136,7 @@ export interface OfferStatsView {
   batchSize: bigint;
   initialized: boolean;
   total: bigint;
-  counts: [bigint, bigint, bigint, bigint];
+  counts: [bigint, bigint, bigint, bigint, bigint];
   /** Non-zero nullifier slots — offers counted so far, without saying whose. */
   nullifiersUsed: number;
   /** Hex of every stored nullifier, oldest first. The public audit trail. */
@@ -167,6 +172,7 @@ export async function readOfferStatsState(
       b1: bigint;
       b2: bigint;
       b3: bigint;
+      b4: bigint;
     } & Record<string, unknown>;
     let nullifiersUsed = 0;
     const nullifiers: string[] = [];
@@ -181,7 +187,7 @@ export async function readOfferStatsState(
       batchSize: view.batchSize,
       initialized: view.initialized,
       total: view.total,
-      counts: [view.b0, view.b1, view.b2, view.b3],
+      counts: [view.b0, view.b1, view.b2, view.b3, view.b4],
       nullifiersUsed,
       nullifiers,
     };
@@ -211,7 +217,7 @@ export async function initOfferStatsBatch(
 
 export async function recordOffer(
   providers: NyxProviders['providers'],
-  bracket: 0 | 1 | 2 | 3,
+  bracket: BracketIndex,
   salary: bigint,
 ): Promise<unknown> {
   setPendingCtc(salary);

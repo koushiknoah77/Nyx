@@ -10,11 +10,14 @@ import CompactStandardLibrary;
 //
 // Brackets (CTC in INR per annum) — the bracket is PUBLIC (it is the product),
 // the exact salary stays a private witness validated by a range predicate:
-//   0: < 500,000 | 1: 500,000–999,999 | 2: 1,000,000–1,999,999 | 3: >= 2,000,000
+//   0: < 600,000 | 1: 600,000–999,999 | 2: 1,000,000–1,499,999
+//   3: 1,500,000–1,999,999 | 4: >= 2,000,000
+// The bottom bracket is a catch-all: every offer counts, including sub-₹3L
+// ones a floored table would silently drop.
 //
 // ─── Privacy Model ───────────────────────────────────────────────────────────
 // PUBLIC (on-chain, visible to anyone):
-//   - `b0..b3`: per-bracket offer counts. The product.
+//   - `b0..b4`: per-bracket offer counts. The product.
 //   - `total`: offers counted so far. `batchSize`: students in the batch
 //     (% placed = total / batchSize, derived off-chain).
 //   - `initialized`: one-time-setup flag (same guard pattern as the counter).
@@ -49,6 +52,7 @@ export ledger b0: Uint<64>;
 export ledger b1: Uint<64>;
 export ledger b2: Uint<64>;
 export ledger b3: Uint<64>;
+export ledger b4: Uint<64>;
 export ledger n00: Bytes<32>;
 export ledger n01: Bytes<32>;
 export ledger n02: Bytes<32>;
@@ -104,7 +108,7 @@ export circuit record(bracket: Uint<8>): [] {
   assert(initialized, "not initialized");
   assert(total < 32, "batch full");
   const b = disclose(bracket);
-  assert(b < 4, "bad bracket");
+  assert(b < 5, "bad bracket");
   const nf = disclose(nullifierOf(offerSecret()));
   assert(nf != n00, "already counted");
   assert(nf != n01, "already counted");
@@ -140,21 +144,27 @@ export circuit record(bracket: Uint<8>): [] {
   assert(nf != n31, "already counted");
   const salary = ctc();
   if (b == 0) {
-    assert(salary < 500000, "ctc not in bracket 0");
+    assert(salary < 600000, "ctc not in bracket 0");
     b0 = (b0 + 1) as Uint<64>;
   } else {
     if (b == 1) {
-      assert(salary >= 500000, "ctc not in bracket 1");
+      assert(salary >= 600000, "ctc not in bracket 1");
       assert(salary < 1000000, "ctc not in bracket 1");
       b1 = (b1 + 1) as Uint<64>;
     } else {
       if (b == 2) {
         assert(salary >= 1000000, "ctc not in bracket 2");
-        assert(salary < 2000000, "ctc not in bracket 2");
+        assert(salary < 1500000, "ctc not in bracket 2");
         b2 = (b2 + 1) as Uint<64>;
       } else {
-        assert(salary >= 2000000, "ctc not in bracket 3");
-        b3 = (b3 + 1) as Uint<64>;
+        if (b == 3) {
+          assert(salary >= 1500000, "ctc not in bracket 3");
+          assert(salary < 2000000, "ctc not in bracket 3");
+          b3 = (b3 + 1) as Uint<64>;
+        } else {
+          assert(salary >= 2000000, "ctc not in bracket 4");
+          b4 = (b4 + 1) as Uint<64>;
+        }
       }
     }
   }

@@ -31,6 +31,7 @@ export type Ledger = {
   readonly b1: bigint;
   readonly b2: bigint;
   readonly b3: bigint;
+  readonly b4: bigint;
   readonly n00: Uint8Array;
   readonly n01: Uint8Array;
   readonly n02: Uint8Array;

@@ -241,8 +241,9 @@ contracts/counter.compact   # the Compact contract
 contracts/offerstats.compact  # OfferStats v1: 4 brackets, 32-slot nullifier set
 managed/counter/ · managed/offerstats/  # compiler output (contract/ keys/ zkir/)
 scripts/                    # deploy-counter.ts, deploy-offerstats.ts, network.ts, wallet.ts, wallet-state.ts
-src/                        # React dApp: App (Home/Stats/Prove/Trust/Colleges/Counter nav), components/, hooks/, midnight/
-src/components/offerstats/  # product views: Home, Stats, Prove, Trust, Colleges, Counter, VerifiedBadge
+src/                        # React dApp: App (page router), components/site/ (product pages), hooks/, midnight/
+src/components/site/        # Navbar (wallet) · Footer · Home/About/How/Students/Colleges/Stats/Join pages · PhoneMock · Faq
+src/components/offerstats/  # CounterView (dev playground) · VerifiedBadge credential
 src/components/PublicCounter.tsx  # read-only Preprod view (no wallet — fixes empty demo)
 src/components/OfferStatsDashboard.tsx  # public aggregates board (bars, % placed, median)
 src/components/OfferStatsTransact.tsx   # batch init + private-CTC record flow
@@ -279,7 +280,7 @@ Last verified: tsc clean · 2 circuits · 21/21 tests · 1447 modules in ~8s. Th
 |-------|--------|------|
 | L1 | ✅ done | Counter on Preview: compile, tests, deploy |
 | L2 | ✅ done | Frontend on Preprod: Lace connect, browser circuit calls, local proving |
-| OfferStats product | ✅ UI done, contract deploy pending | Home (claimed-vs-proven) · Stats board · Prove + verified badge · Trust audit trail · Colleges pilot pitch — Counter preserved as dev-seed tab. Contract 8/8 green, 7 UI helper tests green ([proposal](PROPOSAL.md), [idea](docs/l4-idea.md)) |
+| OfferStats product | ✅ UI done, contract deploy pending | 5-bracket contract (recompiled 0.31.1, fresh ZK) + 8/8 circuit tests · full site (Home/About/How/Students/Colleges/Stats+FAQ/Join) with Lace in the navbar and live chain reads · Counter preserved as dev playground ([proposal](PROPOSAL.md), [idea](docs/l4-idea.md)) |
 | L3 | 🔄 next | Production-grade: CI passing, idea approved against the problem list |
 | L4 | 📝 planned | MVP live on Preprod · Track: Consumer & Social ([writeup](docs/l4-idea.md)) |
 | L5 | 📝 planned | 50 Preprod users from one placed batch + feedback loop |

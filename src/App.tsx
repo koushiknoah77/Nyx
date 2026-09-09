@@ -1,30 +1,24 @@
 import { useCallback, useState } from 'react';
+import { Navbar, type SiteView } from './components/site/Navbar';
+import { Footer } from './components/site/Footer';
+import { HomePage } from './components/site/HomePage';
+import { AboutPage } from './components/site/AboutPage';
+import { HowPage } from './components/site/HowPage';
+import { StudentsPage } from './components/site/StudentsPage';
+import { CollegesPage } from './components/site/CollegesPage';
+import { StatsPage } from './components/site/StatsPage';
+import { JoinPage } from './components/site/JoinPage';
 import { CounterView } from './components/offerstats/CounterView';
-import { HomeView, type View } from './components/offerstats/HomeView';
-import { StatsView } from './components/offerstats/StatsView';
-import { ProveView } from './components/offerstats/ProveView';
-import { TrustView } from './components/offerstats/TrustView';
-import { CollegesView } from './components/offerstats/CollegesView';
 import { useMidnight } from './hooks/useMidnight';
 import { usePublicCounter } from './hooks/usePublicCounter';
 import { useOfferStatsPublic } from './hooks/useOfferStatsPublic';
-import { EXPLORER_URL } from './config';
 import './index.css';
-
-const NAV: Array<{ id: View; label: string }> = [
-  { id: 'home', label: 'Home' },
-  { id: 'stats', label: 'Stats' },
-  { id: 'prove', label: 'Prove' },
-  { id: 'trust', label: 'Trust' },
-  { id: 'colleges', label: 'Colleges' },
-  { id: 'counter', label: 'Counter' },
-];
 
 export default function App() {
   const { status, connect, disconnect, clearError } = useMidnight();
   const publicState = usePublicCounter();
   const offerStats = useOfferStatsPublic();
-  const [view, setView] = useState<View>('home');
+  const [view, setView] = useState<SiteView>('home');
   const [initialized, setInitialized] = useState<boolean | null>(null);
   const connected = status.kind === 'connected';
 
@@ -33,81 +27,67 @@ export default function App() {
     setInitialized(null);
   }, [disconnect]);
 
+  const go = useCallback((v: SiteView) => {
+    setView(v);
+    window.scrollTo({ top: 0 });
+  }, []);
+
   return (
-    <div className="page">
-      <header className="brandbar">
-        <button
-          type="button"
-          className="brand"
-          onClick={() => setView('home')}
-          aria-label="OfferStats home"
-        >
-          <span className="brand-mark" aria-hidden>◍</span> OfferStats
-        </button>
-        <span className="pill pre">Preprod</span>
-      </header>
-
-      <nav className="tabs product-nav" aria-label="Product">
-        {NAV.map((n) => (
-          <button
-            key={n.id}
-            type="button"
-            className={`tab${view === n.id ? ' active' : ''} ${n.id === 'counter' ? 'tab-dev' : ''}`}
-            aria-pressed={view === n.id}
-            onClick={() => setView(n.id)}
-            title={n.id === 'counter' ? 'The seed contract — L2 demo surface' : n.label}
-          >
-            {n.label}
-          </button>
-        ))}
-      </nav>
-
-      <main>
-        {view === 'home' && <HomeView offerStats={offerStats} onGo={setView} />}
-        {view === 'stats' && <StatsView offerStats={offerStats} />}
-        {view === 'prove' && (
-          <ProveView
-            status={status}
-            onConnect={() => void connect()}
-            onDisconnect={handleDisconnect}
-            onClearError={clearError}
-            connected={connected}
-            offerStats={offerStats}
-          />
-        )}
-        {view === 'trust' && <TrustView offerStats={offerStats} />}
-        {view === 'colleges' && <CollegesView />}
-        {view === 'counter' && (
-          <CounterView
-            status={status}
-            onConnect={() => void connect()}
-            onDisconnect={handleDisconnect}
-            onClearError={clearError}
-            connected={connected}
-            initialized={initialized}
-            onViewChange={setInitialized}
-            publicView={publicState.view}
-            publicLoading={publicState.loading}
-            publicError={publicState.error}
-            onPublicRefresh={publicState.refresh}
-          />
-        )}
-      </main>
-
-      <footer>
-        <p className="muted tiny" style={{ margin: 0 }}>
-          Proofs generate locally in your wallet. Secrets never leave this browser.
-        </p>
-        <p className="explorer-hint tiny">
-          <a href={EXPLORER_URL} target="_blank" rel="noreferrer">
-            Midnight Explorer (Preprod) ↗
-          </a>
-          {' · '}
-          <a href="https://github.com/koushiknoah77/Nyx" target="_blank" rel="noreferrer">
-            Source ↗
-          </a>
-        </p>
-      </footer>
-    </div>
+    <>
+      <Navbar
+        view={view}
+        onGo={go}
+        status={status}
+        onConnect={() => void connect()}
+        onDisconnect={handleDisconnect}
+      />
+      <div className="page">
+        <main>
+          {view === 'home' && <HomePage onGo={go} />}
+          {view === 'about' && <AboutPage onGo={go} />}
+          {view === 'how' && <HowPage onGo={go} />}
+          {view === 'students' && (
+            <StudentsPage
+              status={status}
+              onConnect={() => void connect()}
+              onDisconnect={handleDisconnect}
+              onClearError={clearError}
+              offerStats={offerStats}
+            />
+          )}
+          {view === 'colleges' && <CollegesPage onGo={go} />}
+          {view === 'stats' && <StatsPage />}
+          {view === 'join' && <JoinPage />}
+          {view === 'counter' && (
+            <>
+              <section className="hero-block">
+                <p className="kicker">Developer playground</p>
+                <h1 className="mega" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)' }}>
+                  The seed contract.
+                </h1>
+                <p className="lede">
+                  The Nyx counter every OfferStats bracket grows out of — L2 demo
+                  surface, preserved verbatim.
+                </p>
+              </section>
+              <CounterView
+                status={status}
+                onConnect={() => void connect()}
+                onDisconnect={handleDisconnect}
+                onClearError={clearError}
+                connected={connected}
+                initialized={initialized}
+                onViewChange={setInitialized}
+                publicView={publicState.view}
+                publicLoading={publicState.loading}
+                publicError={publicState.error}
+                onPublicRefresh={publicState.refresh}
+              />
+            </>
+          )}
+        </main>
+        <Footer onGo={go} />
+      </div>
+    </>
   );
 }

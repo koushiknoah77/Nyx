@@ -156,10 +156,23 @@
       }
     },
     {
-      "name": "n00",
+      "name": "b4",
       "index": [
         0,
         7
+      ],
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "n00",
+      "index": [
+        0,
+        8
       ],
       "exported": true,
       "storage": "Cell",
@@ -172,7 +185,7 @@
       "name": "n01",
       "index": [
         0,
-        8
+        9
       ],
       "exported": true,
       "storage": "Cell",

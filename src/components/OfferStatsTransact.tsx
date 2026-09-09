@@ -8,6 +8,7 @@ import {
   formatINR,
   initOfferStatsBatch,
   recordOffer,
+  type BracketIndex,
   type OfferStatsView,
 } from '../midnight/offerstats';
 import { txIdOf } from '../midnight/wallet';
@@ -19,7 +20,7 @@ interface Props {
   view: OfferStatsView | null;
   onChanged: () => void;
   /** Fired after a successful record so the parent can mint the flex badge. */
-  onRecorded?: (txId: string, bracket: 0 | 1 | 2 | 3) => void;
+  onRecorded?: (txId: string, bracket: BracketIndex) => void;
 }
 
 type Phase = 'idle' | 'proving' | 'done' | 'error';

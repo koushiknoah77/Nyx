@@ -14,7 +14,7 @@ import {
 // Same harness shape as counter.test.ts (runtime 0.16 API): synchronous
 // circuits, context shape { currentQueryContext }, deterministic secrets.
 // CTC values are plain INR per annum (bigint); brackets:
-//   0: < 500,000 | 1: 500k–999,999 | 2: 1M–1,999,999 | 3: >= 2M
+//   0: < 600,000 | 1: 600k–999,999 | 2: 1M–1,499,999 | 3: 1.5M–1,999,999 | 4: >= 2M
 
 function secretFill(byte: number): Uint8Array {
   return new Uint8Array(32).fill(byte);
@@ -110,28 +110,33 @@ describe('offerstats brackets', () => {
     const offers: Array<[bigint, Uint8Array, bigint]> = [
       [0n, secretFill(11), 350_000n],
       [1n, secretFill(12), 750_000n],
-      [2n, secretFill(13), 1_500_000n],
-      [3n, secretFill(14), 2_800_000n],
+      [2n, secretFill(13), 1_200_000n],
+      [3n, secretFill(14), 1_700_000n],
+      [4n, secretFill(15), 2_800_000n],
     ];
     for (const [bracket, secret, salary] of offers) {
       res = recordOffer(contract, stateOf(res as never), bracket, secret, salary);
     }
     const after = publicStateOf(res as never);
-    expect(after.total).toEqual(4n);
-    expect([after.b0, after.b1, after.b2, after.b3]).toEqual([1n, 1n, 1n, 1n]);
+    expect(after.total).toEqual(5n);
+    expect([after.b0, after.b1, after.b2, after.b3, after.b4]).toEqual([1n, 1n, 1n, 1n, 1n]);
   });
 
   it('enforces bracket boundaries on the private salary', () => {
     const { contract, currentContractState } = freshState();
     const res = initBatch(contract, currentContractState);
     const state = stateOf(res as never);
-    // 500,000 belongs to bracket 1, not 0 — boundary is exact.
-    expect(() => recordOffer(contract, state, 0n, secretFill(21), 500_000n)).toThrow(
+    // 600,000 belongs to bracket 1, not 0 — boundary is exact.
+    expect(() => recordOffer(contract, state, 0n, secretFill(21), 600_000n)).toThrow(
       'ctc not in bracket 0',
     );
-    // 2,000,000 belongs to bracket 3, not 2.
-    expect(() => recordOffer(contract, state, 2n, secretFill(22), 2_000_000n)).toThrow(
+    // 1,500,000 belongs to bracket 3, not 2.
+    expect(() => recordOffer(contract, state, 2n, secretFill(22), 1_500_000n)).toThrow(
       'ctc not in bracket 2',
+    );
+    // 2,000,000 belongs to bracket 4, not 3.
+    expect(() => recordOffer(contract, state, 3n, secretFill(24), 2_000_000n)).toThrow(
+      'ctc not in bracket 3',
     );
     // 999,999 is the top of bracket 1.
     const ok = recordOffer(contract, state, 1n, secretFill(23), 999_999n);
@@ -142,7 +147,7 @@ describe('offerstats brackets', () => {
     const { contract, currentContractState } = freshState();
     const res = initBatch(contract, currentContractState);
     expect(() =>
-      recordOffer(contract, stateOf(res as never), 4n, secretFill(31), 750_000n),
+      recordOffer(contract, stateOf(res as never), 5n, secretFill(31), 750_000n),
     ).toThrow('bad bracket');
   });
 });
@@ -156,10 +161,10 @@ describe('offerstats nullifiers', () => {
     // Same secret, even in a different bracket with a different salary claim:
     // the nullifier is bound to the secret, not the claim.
     expect(() =>
-      recordOffer(contract, stateOf(res as never), 3n, secretFill(41), 5_000_000n),
+      recordOffer(contract, stateOf(res as never), 4n, secretFill(41), 5_000_000n),
     ).toThrow('already counted');
     // A fresh secret counts fine.
-    res = recordOffer(contract, stateOf(res as never), 3n, secretFill(42), 5_000_000n);
+    res = recordOffer(contract, stateOf(res as never), 4n, secretFill(42), 5_000_000n);
     expect(publicStateOf(res as never).total).toEqual(2n);
   });
 

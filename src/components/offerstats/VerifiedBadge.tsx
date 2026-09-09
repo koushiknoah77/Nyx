@@ -1,8 +1,8 @@
-import { BRACKET_META } from '../../midnight/offerstats';
+import { BRACKET_META, type BracketIndex } from '../../midnight/offerstats';
 import { CopyButton } from '../CopyButton';
 
 export interface BadgeData {
-  bracket: 0 | 1 | 2 | 3;
+  bracket: BracketIndex;
   batchLabel: string;
   nullifierHex: string;
   txId: string;

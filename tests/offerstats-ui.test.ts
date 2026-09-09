@@ -14,13 +14,15 @@ import { badgeShareText } from '../src/components/offerstats/VerifiedBadge';
 describe('bracketForSalary', () => {
   it('maps salaries to the contract brackets, boundary-exact', () => {
     expect(bracketForSalary(0n)).toEqual(0);
-    expect(bracketForSalary(499_999n)).toEqual(0);
-    expect(bracketForSalary(500_000n)).toEqual(1);
+    expect(bracketForSalary(599_999n)).toEqual(0);
+    expect(bracketForSalary(600_000n)).toEqual(1);
     expect(bracketForSalary(999_999n)).toEqual(1);
     expect(bracketForSalary(1_000_000n)).toEqual(2);
-    expect(bracketForSalary(1_999_999n)).toEqual(2);
-    expect(bracketForSalary(2_000_000n)).toEqual(3);
-    expect(bracketForSalary(50_000_000n)).toEqual(3);
+    expect(bracketForSalary(1_499_999n)).toEqual(2);
+    expect(bracketForSalary(1_500_000n)).toEqual(3);
+    expect(bracketForSalary(1_999_999n)).toEqual(3);
+    expect(bracketForSalary(2_000_000n)).toEqual(4);
+    expect(bracketForSalary(50_000_000n)).toEqual(4);
   });
 });
 
@@ -37,12 +39,12 @@ describe('percentPlaced', () => {
 
 describe('medianBracket', () => {
   it('finds the lower-median bracket from public counts', () => {
-    expect(medianBracket([1n, 1n, 1n, 1n])).toEqual(2);
-    expect(medianBracket([10n, 0n, 0n, 0n])).toEqual(0);
-    expect(medianBracket([0n, 0n, 0n, 5n])).toEqual(3);
+    expect(medianBracket([1n, 1n, 1n, 1n, 1n])).toEqual(2);
+    expect(medianBracket([10n, 0n, 0n, 0n, 0n])).toEqual(0);
+    expect(medianBracket([0n, 0n, 0n, 0n, 5n])).toEqual(4);
   });
   it('returns null on an empty board', () => {
-    expect(medianBracket([0n, 0n, 0n, 0n])).toBeNull();
+    expect(medianBracket([0n, 0n, 0n, 0n, 0n])).toBeNull();
   });
 });
 
@@ -63,7 +65,7 @@ describe('badgeShareText', () => {
       txId: 'tx123',
     });
     expect(text).toContain('VERIFIED PLACED');
-    expect(text).toContain('₹5L');
+    expect(text).toContain('₹6L');
     expect(text).toContain('tx123');
     expect(text).not.toContain('750000');
     expect(text).not.toMatch(/[0-9]{6,}/);
