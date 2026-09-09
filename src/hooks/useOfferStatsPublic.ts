@@ -61,7 +61,11 @@ export function useOfferStatsPublic(): OfferStatsPublicState {
   useEffect(() => {
     mounted.current = true;
     refresh();
-    if (!isOfferStatsDeployed()) return () => void (mounted.current = false);
+    if (!isOfferStatsDeployed()) {
+      return () => {
+        mounted.current = false;
+      };
+    }
     const timer = window.setInterval(() => refresh(), POLL_MS);
     return () => {
       mounted.current = false;
