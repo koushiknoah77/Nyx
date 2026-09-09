@@ -31,6 +31,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Judge checks (L2 rubric)
+        run: npm run judge
+
       - name: Compile contract
         run: |
           export PATH="$HOME/.local/bin:$PATH"

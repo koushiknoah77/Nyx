@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
-import { FALLBACK_INDEXER, FALLBACK_INDEXER_WS } from '../config';
 import { readCounterState, type CounterView } from '../midnight/providers';
+import { networkReadProvider } from '../midnight/network-provider';
 
 export interface PublicCounterState {
   view: CounterView | null;
@@ -30,10 +29,7 @@ export function usePublicCounter(): PublicCounterState {
     setError(null);
     (async () => {
       try {
-        const publicDataProvider = indexerPublicDataProvider(
-          FALLBACK_INDEXER,
-          FALLBACK_INDEXER_WS,
-        );
+        const publicDataProvider = networkReadProvider();
         const v = await readCounterState(
           publicDataProvider as Parameters<typeof readCounterState>[0],
         );

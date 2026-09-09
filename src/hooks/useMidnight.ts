@@ -1,8 +1,7 @@
 import { useCallback, useState } from 'react';
 import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 import '@midnight-ntwrk/dapp-connector-api';
-import { NETWORK_ID } from '../config';
-import { selectWallet } from '../midnight/wallet';
+import { connectNetworkProvider } from '../midnight/network-provider';
 
 export type MidnightStatus =
   | { kind: 'disconnected' }
@@ -15,17 +14,6 @@ export type MidnightStatus =
     }
   | { kind: 'error'; message: string };
 
-function friendlyError(err: unknown): string {
-  const msg = err instanceof Error ? err.message : String(err);
-  if (/no midnight wallet/i.test(msg)) {
-    return 'Lace wallet not installed. Install it from the Chrome Web Store, then refresh this page.';
-  }
-  if (/user rejected|rejected|denied|cancelled/i.test(msg)) {
-    return 'Connection rejected in the wallet. Click Connect and approve to continue.';
-  }
-  return `Connection failed: ${msg}`;
-}
-
 /** Connection state machine for the Lace wallet (Preprod). */
 export function useMidnight() {
   const [status, setStatus] = useState<MidnightStatus>({ kind: 'disconnected' });
@@ -33,29 +21,14 @@ export function useMidnight() {
   const connect = useCallback(async () => {
     setStatus({ kind: 'connecting' });
     try {
-      const initial = selectWallet();
-      const api = await initial.connect(NETWORK_ID);
-      const { unshieldedAddress } = await api.getUnshieldedAddress();
-      const conn = await api.getConnectionStatus();
-      if (conn.status !== 'connected') {
-        setStatus({ kind: 'error', message: 'Wallet did not confirm the connection. Try again.' });
-        return;
-      }
-      if (conn.networkId !== NETWORK_ID) {
-        setStatus({
-          kind: 'error',
-          message: `Wallet is on '${conn.networkId}'. Switch Lace to Preprod and reconnect.`,
-        });
-        return;
-      }
-      setStatus({
-        kind: 'connected',
-        api,
-        walletName: initial.name,
-        unshieldedAddress,
-      });
+      // Single connect path lives in the network provider module.
+      const conn = await connectNetworkProvider();
+      setStatus({ kind: 'connected', ...conn });
     } catch (err) {
-      setStatus({ kind: 'error', message: friendlyError(err) });
+      setStatus({
+        kind: 'error',
+        message: err instanceof Error ? err.message : String(err),
+      });
     }
   }, []);
 

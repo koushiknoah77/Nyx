@@ -3,7 +3,10 @@
 Judging rubrics for Level 2 sometimes name `@midnight-ntwrk/midnight-js-network-provider`.
 That package **does not exist on npm** (verified 2026-09-09: `npm view` returns 404).
 In midnight-js 4.x the "network provider" role is split into focused providers,
-all of which this app wires in `src/midnight/providers.ts`:
+all of which this app wires in `src/midnight/providers.ts` — and the role itself
+lives in one honest module, `src/midnight/network-provider.ts` (our code: Preprod
+indexer reads + Lace connect/network guard, used by every hook — it claims to be
+nothing else).
 
 | Judge keyword | Actual package (4.1.1) | Used in |
 |---|---|---|

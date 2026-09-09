@@ -12,8 +12,6 @@ import {
   ledger as readLedger,
 } from '../../managed/offerstats/contract/index.js';
 import {
-  FALLBACK_INDEXER,
-  FALLBACK_INDEXER_WS,
   OFFER_SECRET_STORAGE_KEY,
   OFFERSTATS_CAPACITY,
   OFFERSTATS_CONTRACT_ADDRESS,
@@ -21,8 +19,8 @@ import {
   OFFERSTATS_ZK_BASE_PATH,
 } from '../config';
 import { buildProviders, type NyxProviders } from './providers';
+import { networkReadProvider } from './network-provider';
 import { fromHex, toHex } from './wallet';
-import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 
 // ─── Brackets (must match contracts/offerstats.compact) ─────────────────────
 //   0: < 500,000 | 1: 500,000–999,999 | 2: 1,000,000–1,999,999 | 3: >= 2,000,000
@@ -192,9 +190,9 @@ export async function readOfferStatsState(
   }
 }
 
-/** Read-only provider for the public dashboard (no wallet). */
+/** Read-only provider for the public dashboard (no wallet). Single network path. */
 export function readOnlyOfferStatsProvider() {
-  return indexerPublicDataProvider(FALLBACK_INDEXER, FALLBACK_INDEXER_WS);
+  return networkReadProvider();
 }
 
 export async function initOfferStatsBatch(

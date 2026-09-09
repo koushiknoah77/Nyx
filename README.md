@@ -265,6 +265,7 @@ docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.
 
 ```bash
 npx tsc --noEmit      # must be clean
+npm run judge         # L2 rubric self-check — must print "All judge checks passed."
 npm run compile       # must print "Compiling 2 circuits"
 npm test              # must print "Tests 21 passed (21)"
 npm run build         # typecheck + Vite bundle into dist/
