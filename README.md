@@ -101,6 +101,24 @@ sequenceDiagram
 
 I built this as the smallest possible version of OfferStats (see [Initial Idea](#-initial-idea)). Same shape: public aggregates, private inputs, proof in the middle. If this counter is honest, the bigger stats machine can be honest too.
 
+## 📊 OfferStats Tab (L4 MVP — UI done, contract deploy pending)
+
+The app has a second tab, **OfferStats**: the pilot-batch stats board from the vision above.
+
+- **Public dashboard** (no wallet): per-bracket counts with bars, offers counted / 32 slots, % placed, median bracket, nullifiers used. Aggregates only — exact salaries can never appear here by construction.
+- **Placement cell** (Lace): `init(batchSize)` opens counting for one batch (max 32).
+- **Senior** (Lace): type your exact CTC → the app derives your public bracket, proves the salary falls in it, and counts one offer. The figure lives in memory only and is cleared after proving; your per-browser offer secret never renders anywhere.
+
+Status: contract written + 8/8 circuit tests green, UI + 6 helper tests green, browser ZK artifacts shipped (`public/zk/offerstats/`). **Not yet deployed** — deploy, paste the address, rebuild:
+
+```bash
+MIDNIGHT_WALLET_SEED=<funded-seed> npm run deploy:offerstats -- --network preprod
+# paste contracts["offerstats:preprod"] into src/config.ts OFFERSTATS_CONTRACT_ADDRESS
+npm run build   # then redeploy the frontend
+```
+
+Until then the tab honestly renders "Not deployed yet" and the Counter tab is unaffected.
+
 ## 🔐 Privacy Model
 
 - What is PUBLIC (on-chain, anyone can see it):
@@ -184,7 +202,7 @@ Then install Lace, switch it to Preprod, open the app, hit Connect. If proving h
 ## 🧪 Run Tests
 
 ```bash
-npm test   # vitest run — 14 tests (6 counter + 8 offerstats)
+npm test   # vitest run — 21 tests (6 counter + 8 offerstats circuit + 7 UI helpers)
 ```
 
 | # | Test | Guards |
@@ -204,6 +222,8 @@ If any of that breaks, nothing built on top matters.
 # Contracts — first run prints a faucet address and waits for funding
 MIDNIGHT_WALLET_SEED=<funded-seed> npx tsx scripts/deploy-counter.ts --network preview
 MIDNIGHT_WALLET_SEED=<funded-seed> npx tsx scripts/deploy-counter.ts --network preprod
+# OfferStats (L4): same flow, records under contracts["offerstats:<network>"]
+MIDNIGHT_WALLET_SEED=<funded-seed> npm run deploy:offerstats -- --network preprod
 ```
 
 ```bash
@@ -218,20 +238,26 @@ Deploy records the address in `.midnight-state.json` (gitignored). Wallet sync l
 
 ```text
 contracts/counter.compact   # the Compact contract
-managed/counter/            # compiler output: contract/ keys/ zkir/ compiler/
-scripts/                    # deploy-counter.ts, network.ts, wallet.ts, wallet-state.ts
-src/                        # React dApp: App, components/, hooks/, midnight/
+contracts/offerstats.compact  # OfferStats v1: 4 brackets, 32-slot nullifier set
+managed/counter/ · managed/offerstats/  # compiler output (contract/ keys/ zkir/)
+scripts/                    # deploy-counter.ts, deploy-offerstats.ts, network.ts, wallet.ts, wallet-state.ts
+src/                        # React dApp: App (Home/Stats/Prove/Trust/Colleges/Counter nav), components/, hooks/, midnight/
+src/components/offerstats/  # product views: Home, Stats, Prove, Trust, Colleges, Counter, VerifiedBadge
 src/components/PublicCounter.tsx  # read-only Preprod view (no wallet — fixes empty demo)
-src/hooks/usePublicCounter.ts     # indexer-only poll of count/initialized/owner
+src/components/OfferStatsDashboard.tsx  # public aggregates board (bars, % placed, median)
+src/components/OfferStatsTransact.tsx   # batch init + private-CTC record flow
+src/hooks/usePublicCounter.ts · useOfferStatsPublic.ts  # wallet-free indexer polls
+src/midnight/offerstats.ts  # witnesses, readers, circuit calls, bracket helpers
 index.html                  # Vite entry (favicon + OG meta)
 vite.config.ts              # WASM + node-polyfill browser config
 vercel.json                 # SPA rewrites for hosting
-public/zk/counter/          # ZK artifacts served to the browser (keys/, zkir/)
+public/zk/counter/ · public/zk/offerstats/  # ZK artifacts served to the browser
 public/favicon.svg          # Nyx moon-N mark
-tests/counter.test.ts       # 6 vitest tests
+tests/counter.test.ts (6) · tests/offerstats.test.ts (8) · tests/offerstats-ui.test.ts (7)
 docs/l4-idea.md             # L4 idea submission overview
 docs/l2-demo.md             # demo video script (four required shots)
 docs/l2-sdk-note.md         # provider → npm package mapping for judges
+docs/DEPLOY-CHECKLIST.md    # live-deploy + resubmit steps
 docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.txt)
 ```
 
@@ -240,11 +266,11 @@ docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.
 ```bash
 npx tsc --noEmit      # must be clean
 npm run compile       # must print "Compiling 2 circuits"
-npm test              # must print "Tests 14 passed (14)"
+npm test              # must print "Tests 21 passed (21)"
 npm run build         # typecheck + Vite bundle into dist/
 ```
 
-Last verified: tsc clean · 2 circuits · 14/14 tests · 1435 modules in ~7s. The 500 kB+ chunk warning is normal — ledger WASM is just big.
+Last verified: tsc clean · 2 circuits · 21/21 tests · 1447 modules in ~8s. The 500 kB+ chunk warning is normal — ledger WASM is just big.
 
 ## 🗺️ Roadmap
 
@@ -252,7 +278,7 @@ Last verified: tsc clean · 2 circuits · 14/14 tests · 1435 modules in ~7s. Th
 |-------|--------|------|
 | L1 | ✅ done | Counter on Preview: compile, tests, deploy |
 | L2 | ✅ done | Frontend on Preprod: Lace connect, browser circuit calls, local proving |
-| OfferStats v1 | ✅ contract done | `contracts/offerstats.compact`: 4 CTC brackets, 32-slot nullifier set, threshold predicates — 8/8 tests green, not yet deployed ([proposal](PROPOSAL.md), [idea](docs/l4-idea.md)) |
+| OfferStats product | ✅ UI done, contract deploy pending | Home (claimed-vs-proven) · Stats board · Prove + verified badge · Trust audit trail · Colleges pilot pitch — Counter preserved as dev-seed tab. Contract 8/8 green, 7 UI helper tests green ([proposal](PROPOSAL.md), [idea](docs/l4-idea.md)) |
 | L3 | 🔄 next | Production-grade: CI passing, idea approved against the problem list |
 | L4 | 📝 planned | MVP live on Preprod · Track: Consumer & Social ([writeup](docs/l4-idea.md)) |
 | L5 | 📝 planned | 50 Preprod users from one placed batch + feedback loop |

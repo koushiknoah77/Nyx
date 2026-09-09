@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "compile": "compact compile contracts/counter.compact managed/counter && compact compile contracts/offerstats.compact managed/offerstats && node scripts/syncify-managed.mjs managed",
     "test": "vitest run",
-    "deploy": "tsx scripts/deploy-counter.ts"
+    "deploy": "tsx scripts/deploy-counter.ts",
+    "deploy:offerstats": "tsx scripts/deploy-offerstats.ts"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",

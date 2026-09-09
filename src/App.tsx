@@ -1,17 +1,30 @@
 import { useCallback, useState } from 'react';
-import { WalletConnect } from './components/WalletConnect';
-import { CircuitCall } from './components/CircuitCall';
-import { PublicCounter } from './components/PublicCounter';
-import { Steps } from './components/Steps';
-import { CopyButton } from './components/CopyButton';
+import { CounterView } from './components/offerstats/CounterView';
+import { HomeView, type View } from './components/offerstats/HomeView';
+import { StatsView } from './components/offerstats/StatsView';
+import { ProveView } from './components/offerstats/ProveView';
+import { TrustView } from './components/offerstats/TrustView';
+import { CollegesView } from './components/offerstats/CollegesView';
 import { useMidnight } from './hooks/useMidnight';
 import { usePublicCounter } from './hooks/usePublicCounter';
-import { EXPLORER_URL, PREPROD_CONTRACT_ADDRESS } from './config';
+import { useOfferStatsPublic } from './hooks/useOfferStatsPublic';
+import { EXPLORER_URL } from './config';
 import './index.css';
+
+const NAV: Array<{ id: View; label: string }> = [
+  { id: 'home', label: 'Home' },
+  { id: 'stats', label: 'Stats' },
+  { id: 'prove', label: 'Prove' },
+  { id: 'trust', label: 'Trust' },
+  { id: 'colleges', label: 'Colleges' },
+  { id: 'counter', label: 'Counter' },
+];
 
 export default function App() {
   const { status, connect, disconnect, clearError } = useMidnight();
   const publicState = usePublicCounter();
+  const offerStats = useOfferStatsPublic();
+  const [view, setView] = useState<View>('home');
   const [initialized, setInitialized] = useState<boolean | null>(null);
   const connected = status.kind === 'connected';
 
@@ -22,87 +35,75 @@ export default function App() {
 
   return (
     <div className="page">
-      <header className="hero">
-        <span className="hero-eyebrow">
-          <span className="dot" aria-hidden /> Midnight · Preprod
-        </span>
-        <h1>Nyx</h1>
-        <p className="tag">A private counter. Public totals, secret owners, honest numbers.</p>
-        <div className="hero-pills">
-          <span className="pill pre">Preprod</span>
-          <span className="pill">Compact 0.31.1</span>
-          <span className="pill">React + Lace</span>
-        </div>
-        <div className="contractbar">
-          <span className="k">Contract</span>
-          <code title={PREPROD_CONTRACT_ADDRESS}>{PREPROD_CONTRACT_ADDRESS}</code>
-          <span className="actions">
-            <CopyButton text={PREPROD_CONTRACT_ADDRESS} label="Copy" />
-            <a className="linkbtn" href={EXPLORER_URL} target="_blank" rel="noreferrer">
-              Explorer ↗
-            </a>
-          </span>
-        </div>
+      <header className="brandbar">
+        <button
+          type="button"
+          className="brand"
+          onClick={() => setView('home')}
+          aria-label="OfferStats home"
+        >
+          <span className="brand-mark" aria-hidden>◍</span> OfferStats
+        </button>
+        <span className="pill pre">Preprod</span>
       </header>
 
-      <main>
-        {/* Journey follows the wallet's on-chain view once connected,
-            otherwise the public read-only state — never blank. */}
-        <Steps
-          connected={connected}
-          initialized={connected ? initialized : (publicState.view?.initialized ?? null)}
-        />
+      <nav className="tabs product-nav" aria-label="Product">
+        {NAV.map((n) => (
+          <button
+            key={n.id}
+            type="button"
+            className={`tab${view === n.id ? ' active' : ''} ${n.id === 'counter' ? 'tab-dev' : ''}`}
+            aria-pressed={view === n.id}
+            onClick={() => setView(n.id)}
+            title={n.id === 'counter' ? 'The seed contract — L2 demo surface' : n.label}
+          >
+            {n.label}
+          </button>
+        ))}
+      </nav>
 
-        {/* Live Preprod total is always visible, even with no wallet.
-            This is the fix for the "empty demo" judge feedback. */}
-        {!connected && (
-          <PublicCounter
-            view={publicState.view}
-            loading={publicState.loading}
-            error={publicState.error}
-            onRefresh={publicState.refresh}
+      <main>
+        {view === 'home' && <HomeView offerStats={offerStats} onGo={setView} />}
+        {view === 'stats' && <StatsView offerStats={offerStats} />}
+        {view === 'prove' && (
+          <ProveView
+            status={status}
+            onConnect={() => void connect()}
+            onDisconnect={handleDisconnect}
+            onClearError={clearError}
+            connected={connected}
+            offerStats={offerStats}
           />
         )}
-
-        <WalletConnect
-          status={status}
-          onConnect={() => void connect()}
-          onDisconnect={handleDisconnect}
-          onClearError={clearError}
-        />
-
-        {connected ? (
-          <CircuitCall
-            api={status.api}
-            unshieldedAddress={status.unshieldedAddress}
+        {view === 'trust' && <TrustView offerStats={offerStats} />}
+        {view === 'colleges' && <CollegesView />}
+        {view === 'counter' && (
+          <CounterView
+            status={status}
+            onConnect={() => void connect()}
+            onDisconnect={handleDisconnect}
+            onClearError={clearError}
+            connected={connected}
+            initialized={initialized}
             onViewChange={setInitialized}
+            publicView={publicState.view}
+            publicLoading={publicState.loading}
+            publicError={publicState.error}
+            onPublicRefresh={publicState.refresh}
           />
-        ) : (
-          <section className="card" aria-label="How to transact">
-            <h2>Transact</h2>
-            <p className="muted" style={{ marginBottom: 0 }}>
-              Viewing is public — the live total above needs no wallet. To move it,
-              connect Lace (Preprod): initialize once to bind this browser as owner,
-              then increment +1 with a local zero-knowledge proof.
-            </p>
-          </section>
         )}
       </main>
 
       <footer>
         <p className="muted tiny" style={{ margin: 0 }}>
-          Proofs generate locally in your wallet. Your secret never leaves this browser.
+          Proofs generate locally in your wallet. Secrets never leave this browser.
         </p>
         <p className="explorer-hint tiny">
           <a href={EXPLORER_URL} target="_blank" rel="noreferrer">
             Midnight Explorer (Preprod) ↗
           </a>
           {' · '}
-          <a
-            href="https://github.com/koushiknoah77/Nyx"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href="https://github.com/koushiknoah77/Nyx" target="_blank" rel="noreferrer">
             Source ↗
           </a>
         </p>

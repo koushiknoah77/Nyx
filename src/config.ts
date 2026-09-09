@@ -23,3 +23,22 @@ export const EXPLORER_URL = 'https://preprod.midnightexplorer.com/';
 // localStorage key for the owner's secret. Generated once per browser,
 // never displayed anywhere in the UI.
 export const SECRET_STORAGE_KEY = 'nyx-owner-secret';
+
+// ─── OfferStats (L4 MVP) ───────────────────────────────────────────────────
+// Empty until deployed: `npm run deploy:offerstats -- --network preprod`,
+// then paste the address here. The dashboard renders a "not deployed yet"
+// state while this is blank — the Counter tab is unaffected.
+export const OFFERSTATS_CONTRACT_ADDRESS = '';
+
+export const OFFERSTATS_PRIVATE_STATE_ID = 'offerstatsPrivateState';
+
+// Served by Vite/Vercel from public/zk/offerstats -> {keys,zkir}.
+export const OFFERSTATS_ZK_BASE_PATH = '/zk/offerstats';
+
+// localStorage key for the senior's per-browser offer secret (v1 sybil model:
+// the placement cell hands each senior exactly one secret out-of-band).
+// Never displayed anywhere in the UI.
+export const OFFER_SECRET_STORAGE_KEY = 'nyx-offer-secret';
+
+// v1 contract capacity: 32 nullifier slots, one pilot batch.
+export const OFFERSTATS_CAPACITY = 32;

@@ -1,6 +1,6 @@
-✓ 1435 modules transformed.
+✓ 1447 modules transformed.
 dist/assets/midnight_ledger_wasm_bg-*.wasm   ~10,144 kB
-dist/assets/index-*.js                        1,121.01 kB │ gzip: 310.76 kB
-dist/assets/index-*.css                         9.70 kB │ gzip:   2.81 kB
-dist/favicon.svg + dist/zk/counter/{keys,zkir} present (public read-only view ships)
-✓ built in ~7s
+dist/assets/index-*.js                        1,213.05 kB │ gzip: 320.90 kB
+dist/assets/index-*.css                        14.04 kB │ gzip:   3.52 kB
+dist/favicon.svg + dist/zk/{counter,offerstats}/{keys,zkir} present (editorial redesign ships)
+✓ built in ~10s

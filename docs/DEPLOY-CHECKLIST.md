@@ -8,10 +8,10 @@ nvm use 22
 npm ci
 npm run compile   # expect "Compiling 2 circuits"
 npm run typecheck # clean
-npm test          # expect 14 passed (6 counter + 8 offerstats)
-npm run build     # dist/ + dist/zk/counter/ artifacts
+npm test          # expect 20 passed (6 counter + 8 offerstats circuit + 6 UI helpers)
+npm run build     # dist/ + dist/zk/{counter,offerstats}/ artifacts
 ```
-If `dist/zk/counter/` is missing, the deployed demo will fail proving — do not deploy.
+If `dist/zk/offerstats/` is missing, OfferStats proving will fail in the browser — do not deploy.
 
 ## 2. Deploy frontend (Vercel)
 ```bash
@@ -47,3 +47,14 @@ Submit: repo URL + live Vercel URL + demo video link + Preprod address
 `e15e39e7384dacd94089c6b5350094db636b3a238969d5da1793bfc445779890`.
 If a judge flags `@midnight-ntwrk/midnight-js-network-provider` as missing, point to
 `docs/l2-sdk-note.md` — that package 404s on npm; the 4.x equivalents are all wired.
+
+## 7. OfferStats to Preprod (L4, when ready)
+```bash
+MIDNIGHT_WALLET_SEED=<funded-seed> npm run deploy:offerstats -- --network preprod
+```
+- Records under `.midnight-state.json` → `contracts["offerstats:preprod"]`
+  (the counter's slot is untouched).
+- Paste the address into `src/config.ts` → `OFFERSTATS_CONTRACT_ADDRESS`,
+  `npm run build`, `vercel --prod` again.
+- Open the OfferStats tab → init the batch (e.g. 32) → record a test offer from
+  a second browser (fresh secret) to confirm nullifier + bracket flow end to end.

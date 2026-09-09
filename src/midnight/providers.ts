@@ -67,6 +67,7 @@ export interface NyxProviders {
 export async function buildProviders(
   api: ConnectedAPI,
   unshieldedAddress: string,
+  opts: { privateStateStoreName?: string; zkBasePath?: string } = {},
 ): Promise<NyxProviders> {
   setNetworkId(NETWORK_ID);
 
@@ -75,11 +76,12 @@ export async function buildProviders(
   const indexer = svc?.indexerUri ?? FALLBACK_INDEXER;
   const indexerWS = svc?.indexerWsUri ?? FALLBACK_INDEXER_WS;
 
-  // ZK artifacts are served by the app itself (public/zk/counter).
+  // ZK artifacts are served by the app itself (public/zk/<contract>).
   // window.fetch is passed explicitly: bundlers may otherwise resolve the
   // default cross-fetch to its Node build and fail opaquely.
+  const zkBasePath = opts.zkBasePath ?? ZK_BASE_PATH;
   const zkConfigProvider = new FetchZkConfigProvider(
-    `${window.location.origin}${ZK_BASE_PATH}`,
+    `${window.location.origin}${zkBasePath}`,
     window.fetch.bind(window),
   );
   // Proving is delegated to the connected wallet (local proving).
@@ -116,7 +118,7 @@ export async function buildProviders(
   return {
     providers: {
       privateStateProvider: levelPrivateStateProvider({
-        privateStateStoreName: 'nyx-counter-state',
+        privateStateStoreName: opts.privateStateStoreName ?? 'nyx-counter-state',
         accountId: unshieldedAddress,
         privateStoragePasswordProvider: () => 'Nyx-Local-Placeholder-Password-1',
       }),

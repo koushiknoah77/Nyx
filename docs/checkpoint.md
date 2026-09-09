@@ -55,7 +55,20 @@ L4 submission in `docs/l4-idea.md`, L2 demo script in `docs/l2-demo.md`.
   capacity guard. Compact 0.23 findings: no C-style loops (`for const of lo..hi`),
   no element-wise ledger-Vector writes, circuit params are private by default
   (branching needs `disclose()`). `npm run compile` builds both contracts.
-  Not yet deployed; frontend still targets the counter.
+- OfferStats tab (L4 MVP UI, 2026-09-09): Counter | OfferStats tabs in `App.tsx`;
+  public dashboard (`OfferStatsDashboard`: bars, % placed, median, nullifiers used,
+  no wallet), placement-cell init + senior record flow (`OfferStatsTransact`:
+  in-memory salary only, cleared after proving, bracket auto-derived), witnesses
+  + readers in `src/midnight/offerstats.ts`, `useOfferStatsPublic` hook, 6 UI helper
+  tests (`  tests/offerstats-ui.test.ts` 7/7). Browser ZK shipped (`public/zk/offerstats/`).
+  Contract NOT yet deployed → tab renders honest "not deployed yet" state.
+  Deploy: `npm run deploy:offerstats -- --network preprod` (needs funded seed),
+  paste address into `src/config.ts`, rebuild + `vercel --prod`. Suite now 21/21.
+- Product UI rebuild (2026-09-09, the real idea): App is now OfferStats-the-product —
+  Home (claimed-vs-proven hero, how-the-lie-dies, flex/verify/convert trio, credential
+  vision), Stats (board + how-to-read), Prove (senior flow + VerifiedBadge with
+  copy-paste WhatsApp flex text), Trust (on-chain nullifier audit trail + 3-step verify),
+  Colleges (SaaS pitch + free-pilot offer), Counter preserved verbatim as dev-seed tab.
 
 ## Still manual (needs human)
 1. `npm i -g vercel; vercel login; vercel --prod` → paste URL into README Live Demo.

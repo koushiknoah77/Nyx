@@ -43,6 +43,8 @@ export interface NetworkState {
   activeNetwork: NetworkId;
   wallets: Partial<Record<NetworkId, WalletRecord>>;
   deployments: Partial<Record<NetworkId, DeploymentRecord>>;
+  /** Extra contracts beyond the default (counter) deploy, keyed `name:network`. */
+  contracts?: Record<string, DeploymentRecord>;
 }
 
 export const STATE_FILE_NAME = '.midnight-state.json';
@@ -367,7 +369,34 @@ export function recordDeployment(
   saveState(next, { cwd });
 }
 
+/**
+ * Record a non-default contract deploy (e.g. offerstats) without clobbering
+ * the counter's per-network slot. Keyed `name:network` under `contracts`.
+ */
+export function recordContractDeployment(
+  name: string,
+  network: NetworkId,
+  address: string,
+  deployer: string,
+  opts: FsOptions = {},
+): void {
+  const cwd = opts.cwd ?? process.cwd();
+  const existing = loadState({ cwd });
+  const next: NetworkState = existing ?? {
+    version: STATE_VERSION,
+    activeNetwork: network,
+    wallets: {},
+    deployments: {},
+  };
+  next.contracts = {
+    ...next.contracts,
+    [`${name}:${network}`]: { address, deployer, deployedAt: new Date().toISOString() },
+  };
+  saveState(next, { cwd });
+}
+
 export function setActiveNetwork(network: NetworkId, opts: FsOptions = {}): void {
+
   const cwd = opts.cwd ?? process.cwd();
   const existing = loadState({ cwd });
   if (existing && existing.activeNetwork === network) return; // no-op

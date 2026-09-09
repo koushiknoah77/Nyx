@@ -3,21 +3,20 @@ export function PrivacyPanel() {
   return (
     <div className="privacy-grid">
       <div className="privacy-cell pub">
-        <h3>👁 Public</h3>
+        <h3>01 — Public</h3>
         <p>
-          Total <code>count</code>, owner commitment, setup flag. The increment is the constant{' '}
-          <code>1</code>.
+          Bracket counts, totals, nullifiers. That&apos;s the product — anyone may audit it.
         </p>
       </div>
       <div className="privacy-cell priv">
-        <h3>🔒 Private</h3>
+        <h3>02 — Private</h3>
         <p>
-          Your 32-byte secret. Lives in this browser only. Never rendered, never transmitted.
+          Your exact salary and your secret. They live in this browser and die with the tab.
         </p>
       </div>
       <div className="privacy-cell prove">
-        <h3>✨ Proved</h3>
-        <p>“I know the secret behind this counter” — without revealing it or who you are.</p>
+        <h3>03 — Proven</h3>
+        <p>That your salary falls in the bracket you counted. True or false — nothing else.</p>
       </div>
     </div>
   );
