@@ -64,11 +64,11 @@ L4 submission in `docs/l4-idea.md`, L2 demo script in `docs/l2-demo.md`.
   Contract NOT yet deployed → tab renders honest "not deployed yet" state.
   Deploy: `npm run deploy:offerstats -- --network preprod` (needs funded seed),
   paste address into `src/config.ts`, rebuild + `vercel --prod`. Suite now 21/21.
-- Product UI rebuild (2026-09-09, the real idea): App is now OfferStats-the-product —
-  Home (claimed-vs-proven hero, how-the-lie-dies, flex/verify/convert trio, credential
-  vision), Stats (board + how-to-read), Prove (senior flow + VerifiedBadge with
-  copy-paste WhatsApp flex text), Trust (on-chain nullifier audit trail + 3-step verify),
-  Colleges (SaaS pitch + free-pilot offer), Counter preserved verbatim as dev-seed tab.
+- Product UI in Eigen language (black/mono/ice-blue, studied from eigenlayer.xyz
+  hero + numbered sections + product cards): announce bar with live pilot status,
+  home ticker with honest pre-deploy dashes, About as numbered 01/02/03 principles
+  + community banner, dark phone mock, paper credential badge retained.
+  Verified via headless screenshots (desktop all views + true-390px emulation).
 
 ## Still manual (needs human)
 1. `npm i -g vercel; vercel login; vercel --prod` → paste URL into README Live Demo.

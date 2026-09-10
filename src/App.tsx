@@ -52,6 +52,11 @@ export default function App() {
 
   return (
     <>
+      <div className="announce" role="status">
+        MIDNIGHT PREPROD · OFFERSTATS PILOT{' '}
+        <b>{offerStats.deployed ? '● LIVE' : '○ PENDING'}</b>
+        {' · '}PROOFS LOCAL · SALARIES NEVER ON-CHAIN
+      </div>
       <Navbar
         view={view}
         onGo={go}

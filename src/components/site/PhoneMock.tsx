@@ -20,7 +20,7 @@ export function PhoneMock({ variant = 'home' }: Props) {
               <>
                 <b style={{ fontSize: '1.05rem' }}>Verified</b>
                 <span className="muted tiny">Offer counted</span>
-                <span className="badge-bracket" style={{ fontSize: '1.3rem' }}>20 LPA+</span>
+                <span style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--accent)' }}>20 LPA+</span>
               </>
             )}
           </div>

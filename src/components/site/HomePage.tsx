@@ -1,12 +1,18 @@
 import { PhoneMock } from '../site/PhoneMock';
+import { useOfferStatsPublic } from '../../hooks/useOfferStatsPublic';
+import { BRACKET_META, medianBracket, percentPlaced } from '../../midnight/offerstats';
 import type { SiteView } from '../site/Navbar';
 
 interface Props {
   onGo: (v: SiteView) => void;
 }
 
-/** Landing: the promise, the proof illustration, the pilot invite. */
+/** Landing: the promise, the live ticker, the pilot invite. */
 export function HomePage({ onGo }: Props) {
+  const { deployed, view } = useOfferStatsPublic();
+  const pct = view ? percentPlaced(view.total, view.batchSize) : null;
+  const median = view ? medianBracket(view.counts) : null;
+
   return (
     <>
       <section className="hero-block">
@@ -30,6 +36,27 @@ export function HomePage({ onGo }: Props) {
             </div>
           </div>
           <PhoneMock variant="home" />
+        </div>
+      </section>
+
+      <section className="ticker" aria-label="Live chain figures">
+        <div className="ticker-cell">
+          <div className={`ticker-num${deployed && view ? ' ok' : ''}`}>
+            {deployed && view ? view.total.toString() : '—'}
+          </div>
+          <div className="ticker-label">Verified offers</div>
+        </div>
+        <div className="ticker-cell">
+          <div className="ticker-num">{deployed && view ? view.nullifiersUsed : '—'}/32</div>
+          <div className="ticker-label">Nullifiers stored</div>
+        </div>
+        <div className="ticker-cell">
+          <div className="ticker-num">{deployed && pct ? `${pct}%` : '—'}</div>
+          <div className="ticker-label">Placement rate</div>
+        </div>
+        <div className="ticker-cell">
+          <div className="ticker-num">{deployed && median != null ? BRACKET_META[median].short : '—'}</div>
+          <div className="ticker-label">Median bracket</div>
         </div>
       </section>
 
