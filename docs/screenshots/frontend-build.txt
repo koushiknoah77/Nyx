@@ -1,6 +1,6 @@
 ✓ 1447 modules transformed.
 dist/assets/midnight_ledger_wasm_bg-*.wasm   ~10,144 kB
-dist/assets/index-*.js                        1,228.16 kB │ gzip: 324.48 kB
-dist/assets/index-*.css                        20.59 kB │ gzip:   4.66 kB
-dist/favicon.svg + dist/zk/{counter,offerstats}/{keys,zkir} present (Eigen-language UI ships)
+dist/assets/index-*.js                        1,367.29 kB │ gzip: 377.44 kB
+dist/assets/index-*.css                        21.05 kB │ gzip:   4.83 kB
+dist/favicon.svg + dist/zk/{counter,offerstats}/{keys,zkir} present (GSAP+Lenis motion ships)
 ✓ built in ~8s

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useLenis } from 'lenis/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Navbar, type SiteView } from './components/site/Navbar';
 import { Footer } from './components/site/Footer';
 import { HomePage } from './components/site/HomePage';
@@ -12,6 +14,7 @@ import { CounterView } from './components/offerstats/CounterView';
 import { useMidnight } from './hooks/useMidnight';
 import { usePublicCounter } from './hooks/usePublicCounter';
 import { useOfferStatsPublic } from './hooks/useOfferStatsPublic';
+import { SmoothRoot, prefersReducedMotion } from './lib/smooth';
 import './index.css';
 
 const VIEWS: SiteView[] = ['home', 'about', 'how', 'students', 'colleges', 'stats', 'join', 'counter'];
@@ -23,32 +26,48 @@ function viewFromHash(): SiteView {
 }
 
 export default function App() {
+  return (
+    <SmoothRoot>
+      <Shell />
+    </SmoothRoot>
+  );
+}
+
+function Shell() {
   const { status, connect, disconnect, clearError } = useMidnight();
   const publicState = usePublicCounter();
   const offerStats = useOfferStatsPublic();
   const [view, setView] = useState<SiteView>(() => viewFromHash());
   const [initialized, setInitialized] = useState<boolean | null>(null);
   const connected = status.kind === 'connected';
+  const lenis = useLenis();
 
   const handleDisconnect = useCallback(() => {
     disconnect();
     setInitialized(null);
   }, [disconnect]);
 
+  const scrollTop = useCallback(() => {
+    if (lenis && !prefersReducedMotion()) lenis.scrollTo(0, { immediate: true });
+    else window.scrollTo({ top: 0 });
+  }, [lenis]);
+
   const go = useCallback((v: SiteView) => {
     setView(v);
     window.location.hash = `#/${v}`;
-    window.scrollTo({ top: 0 });
-  }, []);
+    scrollTop();
+    // New view = new layout: keep scroll triggers honest.
+    window.setTimeout(() => ScrollTrigger.refresh(), 60);
+  }, [scrollTop]);
 
   useEffect(() => {
     const onHash = () => {
       setView(viewFromHash());
-      window.scrollTo({ top: 0 });
+      scrollTop();
     };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
-  }, []);
+  }, [scrollTop]);
 
   return (
     <>
