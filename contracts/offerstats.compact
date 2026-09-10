@@ -96,8 +96,12 @@ circuit nullifierOf(secret: Bytes<32>): Bytes<32> {
 }
 
 // One-time setup: publish the batch size. No secrets involved.
+// v1 holds one pilot batch: size must fit the 32 nullifier slots, and zero
+// is rejected (a zero denominator makes % placed meaningless).
 export circuit init(size: Uint<64>): [] {
   assert(!initialized, "already initialized");
+  assert(size > 0, "bad batch size");
+  assert(size <= 32, "batch exceeds 32 nullifier slots");
   batchSize = disclose(size);
   initialized = true;
 }

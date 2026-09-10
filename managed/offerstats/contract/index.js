@@ -74,14 +74,14 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('init',
                                      'argument 1 (as invoked from Typescript)',
-                                     'offerstats.compact line 99 char 1',
+                                     'offerstats.compact line 101 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(size_0) === 'bigint' && size_0 >= 0n && size_0 <= 18446744073709551615n)) {
           __compactRuntime.typeError('init',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'offerstats.compact line 99 char 1',
+                                     'offerstats.compact line 101 char 1',
                                      'Uint<0..18446744073709551616>',
                                      size_0)
         }
@@ -108,14 +108,14 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('record',
                                      'argument 1 (as invoked from Typescript)',
-                                     'offerstats.compact line 107 char 1',
+                                     'offerstats.compact line 111 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(bracket_0) === 'bigint' && bracket_0 >= 0n && bracket_0 <= 255n)) {
           __compactRuntime.typeError('record',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'offerstats.compact line 107 char 1',
+                                     'offerstats.compact line 111 char 1',
                                      'Uint<0..256>',
                                      bracket_0)
         }
@@ -964,6 +964,8 @@ export class Contract {
                                                                                         { popeq: { cached: false,
                                                                                                    result: undefined } }]).value),
                             'already initialized');
+    __compactRuntime.assert(size_0 > 0n, 'bad batch size');
+    __compactRuntime.assert(size_0 <= 32n, 'batch exceeds 32 nullifier slots');
     __compactRuntime.queryLedgerState(context,
                                       partialProofData,
                                       [
@@ -1588,7 +1590,7 @@ export class Contract {
       __compactRuntime.assert(salary_0 < 600000n, 'ctc not in bracket 0');
       const tmp_0 = ((t1) => {
                       if (t1 > 18446744073709551615n) {
-                        throw new __compactRuntime.CompactError('offerstats.compact line 148 char 10: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 18446744073709551615');
+                        throw new __compactRuntime.CompactError('offerstats.compact line 152 char 10: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 18446744073709551615');
                       }
                       return t1;
                     })(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
@@ -1631,7 +1633,7 @@ export class Contract {
         __compactRuntime.assert(salary_0 < 1000000n, 'ctc not in bracket 1');
         const tmp_1 = ((t1) => {
                         if (t1 > 18446744073709551615n) {
-                          throw new __compactRuntime.CompactError('offerstats.compact line 153 char 12: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 18446744073709551615');
+                          throw new __compactRuntime.CompactError('offerstats.compact line 157 char 12: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 18446744073709551615');
                         }
                         return t1;
                       })(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
@@ -1674,7 +1676,7 @@ export class Contract {
           __compactRuntime.assert(salary_0 < 1500000n, 'ctc not in bracket 2');
           const tmp_2 = ((t1) => {
                           if (t1 > 18446744073709551615n) {
-                            throw new __compactRuntime.CompactError('offerstats.compact line 158 char 14: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 18446744073709551615');
+                            throw new __compactRuntime.CompactError('offerstats.compact line 162 char 14: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 18446744073709551615');
                           }
                           return t1;
                         })(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
@@ -1717,7 +1719,7 @@ export class Contract {
             __compactRuntime.assert(salary_0 < 2000000n, 'ctc not in bracket 3');
             const tmp_3 = ((t1) => {
                             if (t1 > 18446744073709551615n) {
-                              throw new __compactRuntime.CompactError('offerstats.compact line 163 char 16: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 18446744073709551615');
+                              throw new __compactRuntime.CompactError('offerstats.compact line 167 char 16: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 18446744073709551615');
                             }
                             return t1;
                           })(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
@@ -1758,7 +1760,7 @@ export class Contract {
             __compactRuntime.assert(salary_0 >= 2000000n, 'ctc not in bracket 4');
             const tmp_4 = ((t1) => {
                             if (t1 > 18446744073709551615n) {
-                              throw new __compactRuntime.CompactError('offerstats.compact line 166 char 16: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 18446744073709551615');
+                              throw new __compactRuntime.CompactError('offerstats.compact line 170 char 16: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 18446744073709551615');
                             }
                             return t1;
                           })(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
@@ -2985,7 +2987,7 @@ export class Contract {
     }
     const tmp_5 = ((t1) => {
                     if (t1 > 18446744073709551615n) {
-                      throw new __compactRuntime.CompactError('offerstats.compact line 296 char 11: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 18446744073709551615');
+                      throw new __compactRuntime.CompactError('offerstats.compact line 300 char 11: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 18446744073709551615');
                     }
                     return t1;
                   })(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,

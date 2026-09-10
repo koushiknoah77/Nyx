@@ -2,8 +2,9 @@
  * Deploy the OfferStats contract to a Midnight network.
  * Same wallet/state flow as deploy-counter.ts: reuses the funded wallet from
  * MIDNIGHT_WALLET_SEED (or MNEMONIC), waits for faucet funds + DUST, then
- * deploys. Post-deploy, the placement cell calls init(batchSize) from the
- * OfferStats tab — deploy only runs the implicit constructor.
+ * deploys. The script then calls init(batch-size) itself in the same run —
+ * init is permissionless, so leaving it for later would let anyone poison
+ * the batch (see docs/AUDIT.md F3). The UI init path remains for test flows.
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -13,7 +14,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { WebSocket } from 'ws';
 import * as Rx from 'rxjs';
 
-import { deployContract } from '@midnight-ntwrk/midnight-js-contracts';
+import { deployContract, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
 import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
@@ -25,6 +26,18 @@ import { CompiledContract } from '@midnight-ntwrk/midnight-js-protocol/compact-j
 
 const PRIVATE_STATE_ID = 'offerstatsPrivateState';
 const DUST_WAIT_TIMEOUT_MS = 5 * 60 * 1000;
+
+/** Pilot batch size: v1 init asserts 1..32 (one batch, 32 nullifier slots). */
+function parseBatchSize(argv: string[]): bigint {
+  const i = argv.indexOf('--batch-size');
+  const raw = i >= 0 ? argv[i + 1] : undefined;
+  const n = raw === undefined ? 32n : /^\d+$/.test(raw) ? BigInt(raw) : 0n;
+  if (n < 1n || n > 32n) {
+    throw new Error('--batch-size must be 1-32 (v1 holds one pilot batch of 32).');
+  }
+  return n;
+}
+const BATCH_SIZE = parseBatchSize(process.argv);
 
 const { network, config: networkConfig } = resolveNetwork();
 const WALLET = getOrCreateWallet(network);
@@ -298,8 +311,23 @@ async function main() {
 
   recordContractDeployment('offerstats', network, contractAddress, address.toString());
   console.log('  Saved to .midnight-state.json under contracts["offerstats:<network>"]\n');
+
+  // Initialize in the SAME run, SAME wallet: anyone could otherwise call
+  // init() first and poison the batch (permissionless circuits have no
+  // caller identity). This shrinks that window to seconds.
+  console.log('─── Initialize Batch ───────────────────────────────────────────\n');
+  console.log(`  Opening batch of ${BATCH_SIZE} students...`);
+  const joined = (await findDeployedContract(providers, {
+    contractAddress,
+    compiledContract: compiledContract as never,
+    privateStateId: PRIVATE_STATE_ID,
+    initialPrivateState: {},
+  } as never)) as unknown as { callTx: { init(size: bigint): Promise<unknown> } };
+  await joined.callTx.init(BATCH_SIZE);
+  console.log('  ✅ Batch opened on-chain.\n');
+
   console.log('  Next: paste the address into src/config.ts OFFERSTATS_CONTRACT_ADDRESS,\n');
-  console.log('  rebuild + redeploy the frontend, then open the OfferStats tab and init the batch.\n');
+  console.log('  rebuild + redeploy the frontend. The Students page will show live counting.\n');
 
   await persistWalletState(network, walletCtx);
   await walletCtx.wallet.stop();

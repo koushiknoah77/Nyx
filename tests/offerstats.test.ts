@@ -60,7 +60,7 @@ function stateOf(result: { context: { currentQueryContext: { state: unknown } } 
   return result.context.currentQueryContext.state;
 }
 
-function initBatch(contract: Contract, state: unknown, size = 120n) {
+function initBatch(contract: Contract, state: unknown, size = 32n) {
   const ctx = circuitCtx(contract, state, witnessesFor(secretFill(7), 750_000n));
   return contract.impureCircuits.init(ctx, size);
 }
@@ -79,9 +79,9 @@ function recordOffer(
 describe('offerstats setup', () => {
   it('initializes with the disclosed batch size and rejects a second init', () => {
     const { contract, currentContractState } = freshState();
-    const res = initBatch(contract, currentContractState, 120n);
+    const res = initBatch(contract, currentContractState, 32n);
     const after = publicStateOf(res as never);
-    expect(after.batchSize).toEqual(120n);
+    expect(after.batchSize).toEqual(32n);
     expect(after.initialized).toEqual(true);
     expect(after.total).toEqual(0n);
 
@@ -90,9 +90,21 @@ describe('offerstats setup', () => {
       stateOf(res as never),
       witnessesFor(secretFill(7), 750_000n),
     );
-    expect(() => contract.impureCircuits.init(againCtx, 120n)).toThrow(
+    expect(() => contract.impureCircuits.init(againCtx, 32n)).toThrow(
       'already initialized',
     );
+  });
+
+  it('rejects empty and oversized batches', () => {
+    const { contract, currentContractState } = freshState();
+    // Zero students: % placed would divide by nothing.
+    expect(() =>
+      initBatch(contract, currentContractState, 0n),
+    ).toThrow('bad batch size');
+    // v1 holds 32 nullifier slots: a bigger cohort could never fully count.
+    expect(() =>
+      initBatch(contract, currentContractState, 33n),
+    ).toThrow('batch exceeds');
   });
 
   it('rejects records before init', () => {

@@ -202,7 +202,7 @@ Then install Lace, switch it to Preprod, open the app, hit Connect. If proving h
 ## 🧪 Run Tests
 
 ```bash
-npm test   # vitest run — 21 tests (6 counter + 8 offerstats circuit + 7 UI helpers)
+npm test   # vitest run — 22 tests (6 counter + 9 offerstats circuit + 7 UI helpers)
 ```
 
 | # | Test | Guards |
@@ -222,8 +222,9 @@ If any of that breaks, nothing built on top matters.
 # Contracts — first run prints a faucet address and waits for funding
 MIDNIGHT_WALLET_SEED=<funded-seed> npx tsx scripts/deploy-counter.ts --network preview
 MIDNIGHT_WALLET_SEED=<funded-seed> npx tsx scripts/deploy-counter.ts --network preprod
-# OfferStats (L4): same flow, records under contracts["offerstats:<network>"]
-MIDNIGHT_WALLET_SEED=<funded-seed> npm run deploy:offerstats -- --network preprod
+# OfferStats (L4): same flow, records under contracts["offerstats:<network>"],
+# then opens the batch in the same run (closes the permissionless-init window)
+MIDNIGHT_WALLET_SEED=<funded-seed> npm run deploy:offerstats -- --network preprod --batch-size 32
 ```
 
 ```bash
@@ -268,11 +269,11 @@ docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.
 npx tsc --noEmit      # must be clean
 npm run judge         # L2 rubric self-check — must print "All judge checks passed."
 npm run compile       # must print "Compiling 2 circuits"
-npm test              # must print "Tests 21 passed (21)"
+npm test              # must print "Tests 22 passed (22)"
 npm run build         # typecheck + Vite bundle into dist/
 ```
 
-Last verified: tsc clean · 2 circuits · 21/21 tests · 1447 modules in ~8s. The 500 kB+ chunk warning is normal — ledger WASM is just big.
+Last verified: tsc clean · 2 circuits · 22/22 tests · 1447 modules in ~8s. The 500 kB+ chunk warning is normal — ledger WASM is just big.
 
 ## 🗺️ Roadmap
 

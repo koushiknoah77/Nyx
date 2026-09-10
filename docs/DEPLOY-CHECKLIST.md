@@ -50,11 +50,15 @@ If a judge flags `@midnight-ntwrk/midnight-js-network-provider` as missing, poin
 
 ## 7. OfferStats to Preprod (L4, when ready)
 ```bash
-MIDNIGHT_WALLET_SEED=<funded-seed> npm run deploy:offerstats -- --network preprod
+MIDNIGHT_WALLET_SEED=<funded-seed> npm run deploy:offerstats -- --network preprod --batch-size 32
 ```
 - Records under `.midnight-state.json` → `contracts["offerstats:preprod"]`
-  (the counter's slot is untouched).
+  (the counter's slot is untouched) **and opens the batch in the same run**
+  (batch size asserted 1..32 on-chain; same-run init closes the
+  permissionless-`init` front-run window — see `docs/AUDIT.md` F2/F3).
 - Paste the address into `src/config.ts` → `OFFERSTATS_CONTRACT_ADDRESS`,
   `npm run build`, `vercel --prod` again.
-- Open the OfferStats tab → init the batch (e.g. 32) → record a test offer from
-  a second browser (fresh secret) to confirm nullifier + bracket flow end to end.
+- Record a test offer from a second browser (fresh secret) to confirm
+  nullifier + bracket flow end to end. **Remember the pilot trust root:**
+  v1 proves consistency + uniqueness, not truth — salaries are self-attested
+  until issuer-signed commitments land (AUDIT.md F1).
