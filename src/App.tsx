@@ -52,13 +52,23 @@ function Shell() {
     else window.scrollTo({ top: 0 });
   }, [lenis]);
 
-  const go = useCallback((v: SiteView) => {
+  const scrollToAnchor = useCallback((anchor: string) => {
+    window.setTimeout(() => {
+      const el = document.getElementById(anchor);
+      if (!el) return;
+      if (lenis && !prefersReducedMotion()) lenis.scrollTo(el as HTMLElement);
+      else el.scrollIntoView();
+    }, 80);
+  }, [lenis]);
+
+  const go = useCallback((v: SiteView, anchor?: string) => {
     setView(v);
-    window.location.hash = `#/${v}`;
-    scrollTop();
+    window.location.hash = anchor ? `#/${v}?at=${anchor}` : `#/${v}`;
+    if (anchor) scrollToAnchor(anchor);
+    else scrollTop();
     // New view = new layout: keep scroll triggers honest.
     window.setTimeout(() => ScrollTrigger.refresh(), 60);
-  }, [scrollTop]);
+  }, [scrollTop, scrollToAnchor]);
 
   useEffect(() => {
     const onHash = () => {

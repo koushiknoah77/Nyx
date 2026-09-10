@@ -109,7 +109,7 @@ export function StatsPage() {
         </>
       )}
 
-      <section className="section">
+      <section className="section" id="faq">
         <h2 className="mega" style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.2rem)' }}>Frequently Asked Questions</h2>
         <Faq />
       </section>
