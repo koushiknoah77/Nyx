@@ -3,6 +3,19 @@
 > Level 3 product proposal, Midnight Builder Challenge.
 > Track: **Consumer & Social** · Builds on: **Age / Eligibility Gate** + **Confidential Credentials**.
 
+## 0. Idea-list fit
+
+Primary: **Confidential Credentials — prove a credential is valid without disclosing it.**
+
+| Idea-list element | OfferStats mapping |
+|---|---|
+| The confidential credential | The senior's offer (letter details + exact CTC), committed client-side as a private witness preimage |
+| Validity proof | The `record` circuit: nullifier freshness (never counted before) + bracket-range predicate (salary truly in the claimed bracket) |
+| What is disclosed | Nothing about the credential — only the nullifier (dup detection), the bracket index (which public total moves), and the boolean outcome |
+| The eligibility half | The CTC threshold *is* the Age / Eligibility Gate pattern: "CTC ≥ ₹X" proven true/false, value hidden |
+
+A verifier learns exactly one fact — *a valid, uncounted offer sits in bracket N* — and can trust it without trusting the student, the college, or the platform.
+
 ## 1. What is the product, and who uses it?
 
 **OfferStats** is tamper-proof campus placement statistics. Placed seniors prove their offers
