@@ -361,14 +361,17 @@ increment, show the tx id + refreshed total; end on the Privacy panel
 ## 📸 Screenshots
 
 Terminal captures live under [`docs/screenshots/`](docs/screenshots/). PNGs go next to them as `compile.png`, `tests.png`, `deploy.png`.
-On-chain proof from the official Subscan explorer: `explorer-preprod.png` (Preprod `e15e39e7…`), `explorer-preview.png` (Preview `6880d0b1…`).
+Official-indexer receipt: `indexer-preprod.png` (`ContractDeploy`, tx `01869a57…`, block 2462641).
 Official endpoints reference: `docs-network-endpoints.png` ([Environments and endpoints](https://docs.midnight.network/relnotes/network)).
+Subscan header captures (`explorer-preprod.png`, `explorer-preview.png`) show the address resolves on the official explorer — note its Transactions tab stays empty for Midnight shielded contracts, so the indexer receipt above is the real proof.
 UI captures to add after `vercel --prod`: `ui-disconnected.png` (public total, no wallet),
 `ui-connected.png` (address + circuits), `ui-proving.png` (local-proving spinner),
 `ui-incremented.png` (new total + tx id).
 
-![Preprod contract on Subscan](docs/screenshots/explorer-preprod.png)
-![Preview contract on Subscan](docs/screenshots/explorer-preview.png)
+![Compile — 2 circuits](docs/screenshots/compile.png)
+![Deploy — Preprod address](docs/screenshots/deploy.png)
+![Tests — 23 passing](docs/screenshots/tests.png)
+![Indexer ContractDeploy receipt](docs/screenshots/indexer-preprod.png)
 ![Official Midnight endpoints](docs/screenshots/docs-network-endpoints.png)
 
 <details>
