@@ -9,7 +9,7 @@
 <p>
   <img src="https://img.shields.io/badge/Midnight-Preprod-0f172a?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=" alt="Midnight Preprod" />
   <img src="https://img.shields.io/badge/Compact-0.31.1-7c3aed?style=for-the-badge" alt="Compact 0.31.1" />
-  <img src="https://img.shields.io/badge/Tests-6_passing-16a34a?style=for-the-badge" alt="6 tests passing" />
+  <img src="https://img.shields.io/badge/Tests-23_passing-16a34a?style=for-the-badge" alt="23 tests passing" />
   <img src="https://img.shields.io/badge/Frontend-React_Vite-61dafb?style=for-the-badge" alt="React Vite" />
   <img src="https://github.com/koushiknoah77/Nyx/actions/workflows/ci.yml/badge.svg" alt="CI" />
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="MIT" />
@@ -109,7 +109,7 @@ The app has a second tab, **OfferStats**: the pilot-batch stats board from the v
 - **Placement cell** (Lace): `init(batchSize)` opens counting for one batch (max 32).
 - **Senior** (Lace): type your exact CTC → the app derives your public bracket, proves the salary falls in it, and counts one offer. The figure lives in memory only and is cleared after proving; your per-browser offer secret never renders anywhere.
 
-Status: contract written + 8/8 circuit tests green, UI + 6 helper tests green, browser ZK artifacts shipped (`public/zk/offerstats/`). **Not yet deployed** — deploy, paste the address, rebuild:
+Status: contract written + 10/10 circuit tests green, UI + 7 helper tests green, browser ZK artifacts shipped (`public/zk/offerstats/`). **Not yet deployed** — deploy, paste the address, rebuild:
 
 ```bash
 MIDNIGHT_WALLET_SEED=<funded-seed> npm run deploy:offerstats -- --network preprod
@@ -202,7 +202,7 @@ Then install Lace, switch it to Preprod, open the app, hit Connect. If proving h
 ## 🧪 Run Tests
 
 ```bash
-npm test   # vitest run — 22 tests (6 counter + 9 offerstats circuit + 7 UI helpers)
+npm test   # vitest run — 23 tests (6 counter + 10 offerstats circuit + 7 UI helpers)
 ```
 
 | # | Test | Guards |
@@ -215,6 +215,30 @@ npm test   # vitest run — 22 tests (6 counter + 9 offerstats circuit + 7 UI he
 | 6 | Raw secrets never in public state | privacy |
 
 If any of that breaks, nothing built on top matters.
+
+## 🔁 CI/CD
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to `main` and on every
+pull request. Each run:
+
+1. Checks out the repo and sets up Node.js v22 (with npm cache).
+2. Installs the Compact toolchain and pins `0.31.1` — the version the [support matrix](https://docs.midnight.network/relnotes/support-matrix) pairs with runtime `0.16.0`.
+3. `npm ci` — clean install from the lockfile.
+4. `npm run judge` — the Level 2 rubric self-check; fails the build if a required integration regresses.
+5. `npm run compile` — both Compact contracts.
+6. `npm run typecheck` — `tsc --noEmit`.
+7. `npm test` — Vitest (23 tests: circuit logic, state transitions, privacy, UI helpers).
+8. `npm run build` — production bundle; must finish with zero errors.
+
+The badge at the top of this README reflects the latest run on `main`. A red badge means one of the
+steps above failed — nothing is "verified" until that run is green.
+
+## 🧭 Product Proposal
+
+The Level 3 product proposal — *what the product is and who uses it*, *why Midnight specifically*,
+the public/private/disclosed **data model**, and **Mainnet feasibility** — lives in
+[`PROPOSAL.md`](PROPOSAL.md). The public aggregates board it describes is the **OfferStats** tab
+documented above; the shipped counter is the seed contract that pattern grew out of.
 
 ## 📦 Deploy
 
@@ -269,11 +293,11 @@ docs/screenshots/           # terminal captures (compile.txt, tests.txt, deploy.
 npx tsc --noEmit      # must be clean
 npm run judge         # L2 rubric self-check — must print "All judge checks passed."
 npm run compile       # must print "Compiling 2 circuits"
-npm test              # must print "Tests 22 passed (22)"
+npm test              # must print "Tests 23 passed (23)"
 npm run build         # typecheck + Vite bundle into dist/
 ```
 
-Last verified: tsc clean · 2 circuits · 22/22 tests · 1447 modules in ~8s. The 500 kB+ chunk warning is normal — ledger WASM is just big.
+Last verified: tsc clean · 2 circuits · 23/23 tests · 1463 modules in ~8s. The 500 kB+ chunk warning is normal — ledger WASM is just big.
 
 ## 🗺️ Roadmap
 
@@ -337,17 +361,24 @@ increment, show the tx id + refreshed total; end on the Privacy panel
 ## 📸 Screenshots
 
 Terminal captures live under [`docs/screenshots/`](docs/screenshots/). PNGs go next to them as `compile.png`, `tests.png`, `deploy.png`.
+On-chain proof from the official Subscan explorer: `explorer-preprod.png` (Preprod `e15e39e7…`), `explorer-preview.png` (Preview `6880d0b1…`).
+Official endpoints reference: `docs-network-endpoints.png` ([Environments and endpoints](https://docs.midnight.network/relnotes/network)).
 UI captures to add after `vercel --prod`: `ui-disconnected.png` (public total, no wallet),
 `ui-connected.png` (address + circuits), `ui-proving.png` (local-proving spinner),
 `ui-incremented.png` (new total + tx id).
+
+![Preprod contract on Subscan](docs/screenshots/explorer-preprod.png)
+![Preview contract on Subscan](docs/screenshots/explorer-preview.png)
+![Official Midnight endpoints](docs/screenshots/docs-network-endpoints.png)
 
 <details>
 <summary><b>Compile (<code>docs/screenshots/compile.txt</code>)</b></summary>
 
 ```text
 > nyx-counter@1.0.0 compile
-> compact compile contracts/counter.compact managed/counter && node scripts/syncify-managed.mjs managed
+> compact compile contracts/counter.compact managed/counter && compact compile contracts/offerstats.compact managed/offerstats && node scripts/syncify-managed.mjs managed
 
+Compiling 2 circuits:
 Compiling 2 circuits:
 syncify-managed: nothing to change
 ```
@@ -355,13 +386,15 @@ syncify-managed: nothing to change
 </details>
 
 <details>
-<summary><b>Tests — 6 passing (<code>docs/screenshots/tests.txt</code>)</b></summary>
+<summary><b>Tests — 23 passing (<code>docs/screenshots/tests.txt</code>)</b></summary>
 
 ```text
  ✓ tests/counter.test.ts (6 tests)
+ ✓ tests/offerstats-ui.test.ts (7 tests)
+ ✓ tests/offerstats.test.ts (10 tests)
 
- Test Files  1 passed (1)
-      Tests  6 passed (6)
+ Test Files  3 passed (3)
+      Tests  23 passed (23)
 ```
 
 </details>
@@ -379,10 +412,10 @@ Contract Address: e15e39e7384dacd94089c6b5350094db636b3a238969d5da1793bfc4457798
 <summary><b>Frontend build (<code>docs/screenshots/frontend-build.txt</code>)</b></summary>
 
 ```text
-1430 modules transformed.
+1463 modules transformed.
 dist/assets/midnight_ledger_wasm_bg-*.wasm   10,143.78 kB
-dist/assets/index-*.js                        1,113.33 kB
-built in ~30s
+dist/assets/index-*.js                        1,403.18 kB
+built in ~8s
 ```
 
 </details>
